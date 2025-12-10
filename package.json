@@ -1,0 +1,8 @@
+{
+    "name": "resume-saas",
+    "private": true,
+    "workspaces": [
+        "apps/web",
+        "packages/*"
+    ]
+}
