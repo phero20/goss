@@ -14,3 +14,9 @@ func GetUserByEmail(email string) (*user.User, error) {
 	err := db.DB.Where("email = ?", email).First(&u).Error
 	return &u, err
 }
+
+func GetUserByID(id uint) (*user.User, error) {
+	var u user.User
+	err := db.DB.First(&u, id).Error
+	return &u, err
+}
