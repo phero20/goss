@@ -30,6 +30,79 @@ const colors = [
     { name: "Indigo", value: "#4f46e5" },
 ];
 
+// Helper component for auto-scaling
+function AutoZoomWrapper({ children }: { children: ReactNode }) {
+    const [scale, setScale] = useState(1);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const updateScale = () => {
+            if (!containerRef.current) return;
+
+            const parent = containerRef.current.parentElement;
+            if (!parent) return;
+
+            // Accurately calculate available width inside the parent's padding
+            const style = window.getComputedStyle(parent);
+            const paddingX = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+
+            const availableWidth = parent.clientWidth - paddingX;
+
+            const contentWidth = 794; // A4 pixel width
+
+            // Calculate "Fit Width" scale
+            const scaleW = availableWidth / contentWidth;
+
+            // Cap at 1.2 to avoid excessive zooming
+            const fitScale = Math.min(scaleW, 1.2);
+
+            setScale(fitScale);
+        };
+
+        const resizeObserver = new ResizeObserver(updateScale);
+        const currentContainer = containerRef.current;
+        if (currentContainer && currentContainer.parentElement) {
+            resizeObserver.observe(currentContainer.parentElement);
+        }
+        // Also listen to window resize for responsive padding changes
+        window.addEventListener("resize", updateScale);
+
+        return () => {
+            resizeObserver.disconnect();
+            window.removeEventListener("resize", updateScale);
+        };
+    }, []);
+
+    // The wrapper size sent to Flexbox is the SCALED size.
+    const scaledWidth = 794 * scale;
+    const scaledHeight = 1123 * scale;
+
+    return (
+        <div
+            ref={containerRef}
+            className="relative shadow-sm origin-center bg-white"
+            style={{
+                width: `${scaledWidth}px`,
+                height: `${scaledHeight}px`,
+            }}
+        >
+            <div
+                style={{
+                    width: "794px",
+                    height: "1123px",
+                    transform: `scale(${scale})`,
+                    transformOrigin: "top left",
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                }}
+            >
+                {children}
+            </div>
+        </div>
+    );
+}
+
 export function FinalizeStep() {
     const dispatch = useDispatch<AppDispatch>();
     const templateConfig = useSelector((state: RootState) => state.resume.templateConfig);
@@ -95,125 +168,103 @@ export function FinalizeStep() {
         );
     }
 
-    // Helper component for auto-scaling
-    function AutoZoomWrapper({ children }: { children: ReactNode }) {
-        const [scale, setScale] = useState(1);
-        const containerRef = useRef<HTMLDivElement>(null);
 
-        useEffect(() => {
-            const updateScale = () => {
-                if (!containerRef.current) return;
-
-                const parent = containerRef.current.parentElement;
-                if (!parent) return;
-
-                // Accurately calculate available width inside the parent's padding
-                const style = window.getComputedStyle(parent);
-                const paddingX = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
-
-                const availableWidth = parent.clientWidth - paddingX;
-
-                const contentWidth = 794; // A4 pixel width
-
-                // Calculate "Fit Width" scale
-                const scaleW = availableWidth / contentWidth;
-
-                // Cap at 1.2 to avoid excessive zooming
-                const fitScale = Math.min(scaleW, 1.2);
-
-                setScale(fitScale);
-            };
-
-            const resizeObserver = new ResizeObserver(updateScale);
-            if (containerRef.current.parentElement) {
-                resizeObserver.observe(containerRef.current.parentElement);
-            }
-            // Also listen to window resize for responsive padding changes
-            window.addEventListener("resize", updateScale);
-
-            return () => {
-                resizeObserver.disconnect();
-                window.removeEventListener("resize", updateScale);
-            };
-        }, []);
-
-        // The wrapper size sent to Flexbox is the SCALED size.
-        const scaledWidth = 794 * scale;
-        const scaledHeight = 1123 * scale;
-
-        return (
-            <div
-                ref={containerRef}
-                className="relative shadow-sm origin-center bg-white"
-                style={{
-                    // Flexbox sees this explicit small size and centers it perfectly
-                    width: `${scaledWidth}px`,
-                    height: `${scaledHeight}px`,
-                }}
-            >
-                <div
-                    style={{
-                        width: "794px",
-                        height: "1123px",
-                        transform: `scale(${scale})`,
-                        transformOrigin: "top left",
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                    }}
-                >
-                    {children}
-                </div>
-            </div>
-        );
-    }
 
     // Editor View
     return (
         <div className="w-full h-[calc(100vh)] flex flex-col">
 
             {/* Top Toolbar Control Panel */}
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-2 md:p-4 border-b border-border bg-card/50 backdrop-blur-sm z-10 shadow-sm shrink-0">
+            <div className="flex flex-col md:flex-row items-center justify-between p-4 border-b border-border bg-white/80 backdrop-blur-md z-10 shadow-sm gap-4 transition-all">
 
-                <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4 w-full md:w-auto">
+                {/* Left: Navigation */}
+                <div className="flex items-center w-full md:w-auto">
                     <Button
                         variant="ghost"
                         size="sm"
-                        className="gap-2 text-muted-foreground hover:text-foreground"
+                        className="group gap-2 text-muted-foreground hover:text-foreground transition-colors"
                         onClick={() => setViewMode("gallery")}
                     >
-                        <ArrowLeft className="w-4 h-4" /> <span className="hidden sm:inline">Templates</span>
-                    </Button>
-
-                    <div className="h-6 w-px bg-border hidden md:block" />
-
-                    <div className="flex items-center gap-2 bg-muted/30 px-2 py-1.5 rounded-full border border-border/50 overflow-x-auto max-w-[200px] sm:max-w-none no-scrollbar">
-                        <Palette className="w-4 h-4 text-muted-foreground shrink-0" />
-                        <div className="flex gap-1.5">
-                            {colors.map((c) => (
-                                <button
-                                    key={c.value}
-                                    onClick={() => dispatch(updateTemplateConfig({ color: c.value }))}
-                                    className={cn(
-                                        "w-5 h-5 rounded-full border border-black/10 transition-all hover:scale-125 focus:scale-125 hover:shadow-sm shrink-0",
-                                        templateConfig.color === c.value
-                                            ? "ring-2 ring-primary/20 scale-125 shadow-sm"
-                                            : "opacity-80 hover:opacity-100"
-                                    )}
-                                    style={{ backgroundColor: c.value }}
-                                    title={c.name}
-                                />
-                            ))}
+                        <div className="p-1 rounded-full bg-muted group-hover:bg-muted/80 transition-colors">
+                            <ArrowLeft className="w-4 h-4" />
                         </div>
+                        <span className="font-medium">Templates</span>
+                    </Button>
+                </div>
+
+                {/* Center: Color Studio */}
+                <div className="flex items-center gap-3 bg-muted/40 px-4 py-2 rounded-full border border-border/40 shadow-sm overflow-x-auto max-w-[90vw] md:max-w-none no-scrollbar">
+                    <div className="flex items-center gap-2 pr-4 border-r border-border/50 mr-2">
+                        <Palette className="w-4 h-4 text-primary" />
+                        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:block">Theme</span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        {colors.slice(0, 5).map((c) => (
+                            <button
+                                key={c.value}
+                                onClick={() => dispatch(updateTemplateConfig({ color: c.value }))}
+                                className={cn(
+                                    "w-6 h-6 rounded-full border border-black/5 transition-all hover:scale-110 focus:scale-110 hover:shadow-md",
+                                    templateConfig.color === c.value
+                                        ? "ring-2 ring-primary ring-offset-2 scale-110 shadow-sm"
+                                        : "hover:opacity-100"
+                                )}
+                                style={{ backgroundColor: c.value }}
+                                title={c.name}
+                            />
+                        ))}
+
+                        {/* Custom Color Wheel */}
+                        <div className="relative group ml-1">
+                            <div className="absolute inset-0 bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600 rounded-full blur-[2px] opacity-70 group-hover:opacity-100 transition-opacity" />
+                            <div className={cn(
+                                "relative w-8 h-8 rounded-full border-2 border-white shadow-sm overflow-hidden cursor-pointer transition-transform hover:scale-105 active:scale-95",
+                                !colors.find(c => c.value === templateConfig.color) && "ring-2 ring-primary ring-offset-2"
+                            )}>
+                                <input
+                                    type="color"
+                                    value={templateConfig.color}
+                                    onChange={(e) => dispatch(updateTemplateConfig({ color: e.target.value }))}
+                                    className="absolute inset-0 w-[150%] h-[150%] -top-1/4 -left-1/4 p-0 m-0 cursor-pointer opacity-0"
+                                    title="Custom Color"
+                                />
+                                <div
+                                    className="w-full h-full pointer-events-none"
+                                    style={{
+                                        background: !colors.find(c => c.value === templateConfig.color)
+                                            ? templateConfig.color
+                                            : 'conic-gradient(from 0deg, red, yellow, lime, aqua, blue, magenta, red)'
+                                    }}
+                                />
+                            </div>
+                        </div>
+
+                        {colors.slice(5).map((c) => (
+                            <button
+                                key={c.value}
+                                onClick={() => dispatch(updateTemplateConfig({ color: c.value }))}
+                                className={cn(
+                                    "w-6 h-6 rounded-full border border-black/5 transition-all hover:scale-110 focus:scale-110 hover:shadow-md",
+                                    templateConfig.color === c.value
+                                        ? "ring-2 ring-primary ring-offset-2 scale-110 shadow-sm"
+                                        : "hover:opacity-100"
+                                )}
+                                style={{ backgroundColor: c.value }}
+                                title={c.name}
+                            />
+                        ))}
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2 md:gap-4 w-full md:w-auto justify-center">
-                    <p className="hidden lg:block text-xs text-muted-foreground">
-                        <span className="font-semibold text-primary">Pro Tip:</span> Save as PDF
-                    </p>
-                    <Button onClick={handlePrint} className="gap-2 shadow-lg hover:shadow-xl transition-all w-full md:w-auto">
-                        <Printer className="w-4 h-4" /> <span className="hidden sm:inline">Download PDF</span><span className="sm:hidden">Download</span>
+                {/* Right: Actions */}
+                <div className="flex items-center gap-3 w-full md:w-auto justify-end">
+                    <Button
+                        onClick={handlePrint}
+                        className="gap-2 shadow-lg shadow-primary/20 hover:shadow-primary/30 hover:scale-[1.02] transition-all bg-gradient-to-r from-primary to-primary/90 w-full md:w-auto"
+                    >
+                        <Printer className="w-4 h-4" />
+                        <span className="font-semibold">Export PDF</span>
                     </Button>
                 </div>
             </div>
