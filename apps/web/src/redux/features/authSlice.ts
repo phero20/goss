@@ -45,13 +45,23 @@ const initialState: AuthState = {
 };
 
 // Async Thunks
+// Async Thunks
 export const loginUser = createAsyncThunk(
     'auth/login',
     async (credentials: LoginCredentials, { rejectWithValue }) => {
         try {
-            const response = await api.post<AuthResponse>('/auth/login', credentials);
-            localStorage.setItem('token', response.data.token);
-            return response.data;
+            // Updated: API now only returns token
+            const response = await api.post<{ token: string; message: string }>('/auth/login', credentials);
+            const { token } = response.data;
+
+            localStorage.setItem('token', token);
+
+            // Fetch user details manually using the new verify-token endpoint
+            const userResponse = await api.get<{ user: User }>('/auth/verify-token', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            return { token, user: userResponse.data.user };
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.error || 'Login failed');
         }
@@ -62,11 +72,36 @@ export const registerUser = createAsyncThunk(
     'auth/register',
     async (credentials: RegisterCredentials, { rejectWithValue }) => {
         try {
-            const response = await api.post<AuthResponse>('/auth/register', credentials);
-            localStorage.setItem('token', response.data.token);
-            return response.data;
+            // Updated: API now only returns token
+            const response = await api.post<{ token: string; message: string }>('/auth/register', credentials);
+            const { token } = response.data;
+
+            localStorage.setItem('token', token);
+
+            // Fetch user details manually
+            const userResponse = await api.get<{ user: User }>('/auth/verify-token', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            return { token, user: userResponse.data.user };
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.error || 'Registration failed');
+        }
+    }
+);
+
+export const loadUser = createAsyncThunk(
+    'auth/loadUser',
+    async (_, { rejectWithValue }) => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) return rejectWithValue('No token found');
+
+            const response = await api.get<{ user: User }>('/auth/verify-token');
+            return response.data.user;
+        } catch (error: any) {
+            localStorage.removeItem('token');
+            return rejectWithValue(error.response?.data?.error || 'Failed to load user');
         }
     }
 );
@@ -118,6 +153,21 @@ const authSlice = createSlice({
             .addCase(registerUser.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload as string;
+            })
+            // Load User
+            .addCase(loadUser.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(loadUser.fulfilled, (state, action) => {
+                state.loading = false;
+                state.isAuthenticated = true;
+                state.user = action.payload;
+            })
+            .addCase(loadUser.rejected, (state) => {
+                state.loading = false;
+                state.isAuthenticated = false;
+                state.user = null;
+                state.token = null;
             });
     },
 });

@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 };
 
 import { ReduxProvider } from "@/redux/provider";
-import Navbar from "@/components/shared/Navbar";
+import ClientLayout from "@/components/shared/ClientLayout";
 
 export default function RootLayout({
   children,
@@ -31,10 +31,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ReduxProvider>
-          <Navbar />
-          <div className="pt-20">
-  {children}
-          </div>
+          <ClientLayout>
+            {children}
+          </ClientLayout>
         </ReduxProvider>
       </body>
     </html>

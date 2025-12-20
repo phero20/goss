@@ -4,9 +4,24 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation"; // Correct hook
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Rocket, LogIn } from "lucide-react";
+import { Menu, X, Rocket, LogIn, User, Settings, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuGroup,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/redux/store";
+import { loadUser, logout } from "@/redux/features/authSlice";
+
+import { AuthModal } from "./AuthModal";
 
 export default function Navbar() {
     const [open, setOpen] = useState(false);
@@ -14,6 +29,15 @@ export default function Navbar() {
     const pathname = usePathname();
     const [isVisible, setIsVisible] = useState(true);
     const [lastScrollY, setLastScrollY] = useState(0);
+
+    // Redux Auth
+    const dispatch = useDispatch<AppDispatch>();
+    const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
+
+    // Load user on mount
+    useEffect(() => {
+        dispatch(loadUser());
+    }, [dispatch]);
 
     // Handle scroll effect
     useEffect(() => {
@@ -35,11 +59,24 @@ export default function Navbar() {
         return () => window.removeEventListener("scroll", handleScroll);
     }, [lastScrollY]);
 
+    const handleLogout = () => {
+        dispatch(logout());
+        setOpen(false); // Close mobile menu if open
+    };
+
     const navLinks = [
         { name: "Features", href: "#features" },
         { name: "Examples", href: "#examples" },
         { name: "Pricing", href: "#pricing" },
+        
     ];
+
+    // Helper to get initials
+    const getInitials = (name: string) => {
+        const parts = name.split(" ");
+        if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+        return name.slice(0, 2).toUpperCase();
+    };
 
     return (
         <motion.nav
@@ -78,17 +115,68 @@ export default function Navbar() {
                     ))}
 
                     <div className="flex items-center gap-4 pl-4 border-l border-border/50">
-                        <Link href="/login">
-                            <Button variant="ghost" size="default" className="gap-2">
-                                <LogIn className="w-4 h-4" />
-                                Login
-                            </Button>
-                        </Link>
-                        <Link href="/register">
-                            <Button size="lg" className="shadow-lg shadow-primary/20">
-                                Get Started
-                            </Button>
-                        </Link>
+                        {isAuthenticated && user ? (
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                                        <Avatar className="h-9 w-9 border border-primary/20">
+                                            <AvatarFallback className="bg-primary/10 text-primary font-bold">
+                                                {getInitials(user.name)}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent className="w-56" align="end" forceMount>
+                                    <DropdownMenuLabel className="font-normal">
+                                        <div className="flex flex-col space-y-1">
+                                            <p className="text-sm font-medium leading-none">{user.name}</p>
+                                            <p className="text-xs leading-none text-muted-foreground">
+                                                {user.email}
+                                            </p>
+                                        </div>
+                                    </DropdownMenuLabel>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuGroup>
+                                        <DropdownMenuItem asChild>
+                                            <Link href="/dashboard" className="cursor-pointer">
+                                                <User className="mr-2 h-4 w-4" />
+                                                <span>Dashboard</span>
+                                            </Link>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem asChild>
+                                            <Link href="/settings" className="cursor-pointer">
+                                                <Settings className="mr-2 h-4 w-4" />
+                                                <span>Settings</span>
+                                            </Link>
+                                        </DropdownMenuItem>
+                                    </DropdownMenuGroup>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem onClick={handleLogout} className="text-red-500 cursor-pointer focus:text-red-500">
+                                        <LogOut className="mr-2 h-4 w-4" />
+                                        <span>Log out</span>
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        ) : (
+                            <>
+                                <AuthModal
+                                    trigger={
+                                        <Button variant="ghost" size="default" className="gap-2">
+                                            <LogIn className="w-4 h-4" />
+                                            Login
+                                        </Button>
+                                    }
+                                />
+                                <AuthModal
+                                    defaultTab="register"
+                                    trigger={
+                                        <Button size="lg" className="shadow-lg shadow-primary/20">
+                                            Get Started
+                                        </Button>
+                                    }
+                                />
+                            </>
+                        )}
                     </div>
                 </div>
 
@@ -122,17 +210,49 @@ export default function Navbar() {
                                 </Link>
                             ))}
                             <div className="h-px bg-border my-4" />
-                            <Link href="/login" onClick={() => setOpen(false)}>
-                                <Button variant="ghost" className="w-full justify-start gap-2">
-                                    <LogIn className="w-4 h-4" />
-                                    Login
-                                </Button>
-                            </Link>
-                            <Link href="/register" onClick={() => setOpen(false)}>
-                                <Button className="w-full shadow-lg shadow-primary/20">
-                                    Get Started
-                                </Button>
-                            </Link>
+
+                            {isAuthenticated && user ? (
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-3 px-2 py-3 bg-muted/30 rounded-lg">
+                                        <Avatar className="h-10 w-10 border border-primary/20">
+                                            <AvatarFallback className="bg-primary/10 text-primary font-bold">
+                                                {getInitials(user.name)}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <div className="flex flex-col">
+                                            <span className="font-medium text-sm">{user.name}</span>
+                                            <span className="text-xs text-muted-foreground">{user.email}</span>
+                                        </div>
+                                    </div>
+                                    <Button variant="ghost" className="w-full justify-start gap-2" asChild>
+                                        <Link href="/dashboard" onClick={() => setOpen(false)}>
+                                            <User className="w-4 h-4" /> Dashboard
+                                        </Link>
+                                    </Button>
+                                    <Button variant="ghost" className="w-full justify-start gap-2 text-red-500 hover:text-red-500 hover:bg-red-500/10" onClick={handleLogout}>
+                                        <LogOut className="w-4 h-4" /> Log out
+                                    </Button>
+                                </div>
+                            ) : (
+                                <>
+                                    <AuthModal
+                                        trigger={
+                                            <Button variant="ghost" className="w-full justify-start gap-2">
+                                                <LogIn className="w-4 h-4" />
+                                                Login
+                                            </Button>
+                                        }
+                                    />
+                                    <AuthModal
+                                        defaultTab="register"
+                                        trigger={
+                                            <Button className="w-full shadow-lg shadow-primary/20">
+                                                Get Started
+                                            </Button>
+                                        }
+                                    />
+                                </>
+                            )}
                         </div>
                     </motion.div>
                 )}
