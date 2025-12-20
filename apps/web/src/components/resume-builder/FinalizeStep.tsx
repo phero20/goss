@@ -30,11 +30,68 @@ const colors = [
     { name: "Indigo", value: "#4f46e5" },
 ];
 
+// Helper for Gallery Thumbnails
+function ThumbnailWrapper({ children }: { children: ReactNode }) {
+    const [scale, setScale] = useState(0.25);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const updateScale = () => {
+            if (!containerRef.current) return;
+            // The container is the "Card" width.
+            const availableWidth = containerRef.current.clientWidth;
+            const contentWidth = 794; // A4
+
+            // Just scale to fit width exactly
+            const s = availableWidth / contentWidth;
+            setScale(s);
+        };
+
+        const resizeObserver = new ResizeObserver(updateScale);
+        if (containerRef.current) {
+            resizeObserver.observe(containerRef.current);
+        }
+        window.addEventListener("resize", updateScale);
+
+        // Initial scaling
+        updateScale();
+
+        return () => {
+            resizeObserver.disconnect();
+            window.removeEventListener("resize", updateScale);
+        };
+    }, []);
+
+    return (
+        <div ref={containerRef} className="w-full h-full relative overflow-hidden bg-white">
+            <div
+                style={{
+                    width: "794px",
+                    height: "1123px",
+                    transform: `scale(${scale})`,
+                    transformOrigin: "top left",
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    // Prevent interactions in thumbnail
+                    pointerEvents: "none",
+                    userSelect: "none"
+                }}
+            >
+                {children}
+            </div>
+        </div>
+    );
+}
+
 // Helper component for auto-scaling
 function AutoZoomWrapper({ children }: { children: ReactNode }) {
     const [scale, setScale] = useState(1);
+    const [contentHeight, setContentHeight] = useState(1123);
     const containerRef = useRef<HTMLDivElement>(null);
+    const contentRef = useRef<HTMLDivElement>(null);
 
+    // 1. Calculate Scale based on available width
     useEffect(() => {
         const updateScale = () => {
             if (!containerRef.current) return;
@@ -73,23 +130,45 @@ function AutoZoomWrapper({ children }: { children: ReactNode }) {
         };
     }, []);
 
+    // 2. Observe Content Height to resize wrapper
+    useEffect(() => {
+        if (!contentRef.current) return;
+
+        const updateHeight = () => {
+            if (contentRef.current) {
+                // Determine height: at least A4 (1123px)
+                const h = Math.max(contentRef.current.offsetHeight, 1123);
+                setContentHeight(h);
+            }
+        };
+
+        const resizeObserver = new ResizeObserver(updateHeight);
+        resizeObserver.observe(contentRef.current);
+
+        // Initial measurement
+        updateHeight();
+
+        return () => resizeObserver.disconnect();
+    }, []);
+
     // The wrapper size sent to Flexbox is the SCALED size.
     const scaledWidth = 794 * scale;
-    const scaledHeight = 1123 * scale;
+    const scaledHeight = contentHeight * scale;
 
     return (
         <div
             ref={containerRef}
-            className="relative shadow-sm origin-center bg-white"
+            className="relative origin-center"
             style={{
                 width: `${scaledWidth}px`,
                 height: `${scaledHeight}px`,
             }}
         >
             <div
+                ref={contentRef}
                 style={{
                     width: "794px",
-                    height: "1123px",
+                    minHeight: "1123px",
                     transform: `scale(${scale})`,
                     transformOrigin: "top left",
                     position: "absolute",
@@ -120,7 +199,7 @@ export function FinalizeStep() {
     // Gallery View
     if (viewMode === "gallery") {
         return (
-            <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in py-20 slide-in-from-bottom-4 duration-500 px-4">
                 <div className="space-y-2 text-center">
                     <h1 className="text-3xl font-bold tracking-tight text-foreground">
                         Choose your template
@@ -130,7 +209,7 @@ export function FinalizeStep() {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
                     {templates.map((template) => (
                         <div
                             key={template.id}
@@ -138,14 +217,14 @@ export function FinalizeStep() {
                             className="group relative cursor-pointer rounded-xl border border-border bg-card overflow-hidden hover:shadow-xl hover:border-primary/50 transition-all duration-300"
                         >
                             {/* Mini Preview Window */}
-                            <div className="aspect-[210/297] w-full bg-slate-100 relative overflow-hidden">
-                                <div className="absolute top-0 left-0 w-[210mm] h-[297mm] transform origin-top-left scale-[0.25] sm:scale-[0.33] pointer-events-none select-none p-8">
+                            <div className="aspect-210/267 w-full bg-slate-100 relative overflow-hidden">
+                                <ThumbnailWrapper>
                                     <DynamicResumePreview overrideConfig={{ id: template.id }} />
-                                </div>
+                                </ThumbnailWrapper>
                                 <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/5 transition-colors" />
 
                                 {/* Select Overlay */}
-                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
                                     <span className="bg-primary text-primary-foreground px-4 py-2 rounded-full font-medium shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-transform">
                                         Use Template
                                     </span>
@@ -172,10 +251,10 @@ export function FinalizeStep() {
 
     // Editor View
     return (
-        <div className="w-full h-[calc(100vh)] flex flex-col">
+        <div className="w-full flex flex-col h-[calc(100vh)] ">
 
             {/* Top Toolbar Control Panel */}
-            <div className="flex flex-col md:flex-row items-center justify-between p-4 border-b border-border bg-white/80 backdrop-blur-md z-10 shadow-sm gap-4 transition-all">
+            <div className="flex flex-col md:flex-row items-center justify-between p-4 md:px-14 border-b border-border bg-white/80 backdrop-blur-md z-10 shadow-sm gap-4 transition-all">
 
                 {/* Left: Navigation */}
                 <div className="flex items-center w-full md:w-auto">
@@ -193,13 +272,13 @@ export function FinalizeStep() {
                 </div>
 
                 {/* Center: Color Studio */}
-                <div className="flex items-center gap-3 bg-muted/40 px-4 py-2 rounded-full border border-border/40 shadow-sm overflow-x-auto max-w-[90vw] md:max-w-none no-scrollbar">
-                    <div className="flex items-center gap-2 pr-4 border-r border-border/50 mr-2">
+                <div className="flex flex-wrap md:flex-nowrap justify-center items-center gap-3 bg-muted/40 px-4 py-3 md:py-2 rounded-2xl md:rounded-full border border-border/40 shadow-sm w-full md:w-auto">
+                    <div className="flex items-center gap-2 pr-4 md:border-r md:border-border/50 mr-2 border-r-0 w-full md:w-auto justify-center md:justify-start mb-2 md:mb-0">
                         <Palette className="w-4 h-4 text-primary" />
-                        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:block">Theme</span>
+                        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Theme</span>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap justify-center items-center gap-4">
                         {colors.slice(0, 5).map((c) => (
                             <button
                                 key={c.value}
@@ -270,7 +349,7 @@ export function FinalizeStep() {
             </div>
 
             {/* Main Preview Area */}
-            <div className="flex-1 overflow-y-auto overflow-x-hidden relative flex justify-center p-4 md:p-8 bg-slate-100/50 bg-grid-slate-200 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden relative flex justify-center p-4 md:p-8">
                 <AutoZoomWrapper>
                     <DynamicResumePreview />
                 </AutoZoomWrapper>

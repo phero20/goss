@@ -6,6 +6,7 @@ import { ResumeHeader } from "./atoms/ResumeHeader";
 import { ResumeSection } from "./atoms/ResumeSection";
 import { ResumeItem } from "./atoms/ResumeItem";
 import { cn } from "@/lib/utils";
+import { User, Briefcase, GraduationCap, Wrench, MapPin, Phone, Mail, Linkedin, Globe, Award } from "lucide-react";
 
 interface DynamicResumePreviewProps {
     overrideConfig?: {
@@ -54,18 +55,46 @@ export function DynamicResumePreview({ overrideConfig }: DynamicResumePreviewPro
                     </div>
 
                     {/* Contact Info in Sidebar */}
+                    {/* Contact Info in Sidebar */}
                     <div className="space-y-4 text-sm text-white/80">
-                        {personalInfo.email && <div className="break-all">{personalInfo.email}</div>}
-                        {personalInfo.phone && <div>{personalInfo.phone}</div>}
-                        {personalInfo.location && <div>{personalInfo.location}</div>}
-                        {personalInfo.linkedin && <div className="break-all">{personalInfo.linkedin}</div>}
-                        {personalInfo.website && <div className="break-all">{personalInfo.website}</div>}
+                        {personalInfo.email && (
+                            <div className="flex items-center gap-2 break-all">
+                                <Mail className="w-4 h-4 shrink-0 opacity-70" />
+                                {personalInfo.email}
+                            </div>
+                        )}
+                        {personalInfo.phone && (
+                            <div className="flex items-center gap-2">
+                                <Phone className="w-4 h-4 shrink-0 opacity-70" />
+                                {personalInfo.phone}
+                            </div>
+                        )}
+                        {personalInfo.location && (
+                            <div className="flex items-center gap-2">
+                                <MapPin className="w-4 h-4 shrink-0 opacity-70" />
+                                {personalInfo.location}
+                            </div>
+                        )}
+                        {personalInfo.linkedin && (
+                            <div className="flex items-center gap-2 break-all">
+                                <Linkedin className="w-4 h-4 shrink-0 opacity-70" />
+                                {personalInfo.linkedin}
+                            </div>
+                        )}
+                        {personalInfo.website && (
+                            <div className="flex items-center gap-2 break-all">
+                                <Globe className="w-4 h-4 shrink-0 opacity-70" />
+                                {personalInfo.website}
+                            </div>
+                        )}
                     </div>
 
                     {/* Skills in Sidebar */}
                     {skills.length > 0 && (
                         <div className="pt-6 border-t border-white/20">
-                            <h3 className="text-xs font-bold uppercase tracking-wider text-white/50 mb-4">Skills</h3>
+                            <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-white/50 mb-4">
+                                <Wrench className="w-3 h-3" /> Skills
+                            </h3>
                             <div className="flex flex-wrap gap-2">
                                 {skills.map(skill => (
                                     <span key={skill.id} className="bg-white/10 px-2 py-1 rounded text-xs text-white">
@@ -80,13 +109,13 @@ export function DynamicResumePreview({ overrideConfig }: DynamicResumePreviewPro
                 {/* Main Content (Right) */}
                 <div className="p-8 md:p-12 bg-white h-full min-h-[inherit]">
                     {summary && (
-                        <ResumeSection title="Profile" themeConfig={templateConfig}>
+                        <ResumeSection title="Profile" themeConfig={templateConfig} icon={User}>
                             <p className="text-sm text-slate-700 leading-relaxed">{summary}</p>
                         </ResumeSection>
                     )}
 
                     {experience.length > 0 && (
-                        <ResumeSection title="Experience" themeConfig={templateConfig}>
+                        <ResumeSection title="Experience" themeConfig={templateConfig} icon={Briefcase}>
                             {experience.map(job => (
                                 <ResumeItem
                                     key={job.id}
@@ -102,7 +131,7 @@ export function DynamicResumePreview({ overrideConfig }: DynamicResumePreviewPro
                     )}
 
                     {education.length > 0 && (
-                        <ResumeSection title="Education" themeConfig={templateConfig}>
+                        <ResumeSection title="Education" themeConfig={templateConfig} icon={GraduationCap}>
                             {education.map(edu => (
                                 <ResumeItem
                                     key={edu.id}
@@ -135,15 +164,15 @@ export function DynamicResumePreview({ overrideConfig }: DynamicResumePreviewPro
                         </h2>
 
                         <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/80 font-medium">
-                            {personalInfo.email && <span>{personalInfo.email}</span>}
-                            {personalInfo.phone && <span>{personalInfo.phone}</span>}
-                            {personalInfo.location && <span>{personalInfo.location}</span>}
-                            {personalInfo.linkedin && <span>{personalInfo.linkedin}</span>}
+                            {personalInfo.email && <span className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5" />{personalInfo.email}</span>}
+                            {personalInfo.phone && <span className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5" />{personalInfo.phone}</span>}
+                            {personalInfo.location && <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" />{personalInfo.location}</span>}
+                            {personalInfo.linkedin && <span className="flex items-center gap-1.5"><Linkedin className="w-3.5 h-3.5" />{personalInfo.linkedin}</span>}
                         </div>
                     </div>
                 </header>
 
-                <div className="p-12 -mt-8 bg-white rounded-t-3xl mx-4 min-h-[inherit] shadow-lg">
+                <div className="p-12 -mt-8 bg-white rounded-t-xl mx-4 min-h-[inherit]">
                     {summary && (
                         <section className="mb-10">
                             <p className="text-base text-slate-700 leading-relaxed font-medium">
@@ -154,7 +183,7 @@ export function DynamicResumePreview({ overrideConfig }: DynamicResumePreviewPro
 
                     <div className="space-y-2">
                         {experience.length > 0 && (
-                            <ResumeSection title="Work Experience" themeConfig={templateConfig} variant="boxed">
+                            <ResumeSection title="Work Experience" themeConfig={templateConfig} variant="boxed" icon={Briefcase}>
                                 {experience.map(job => (
                                     <ResumeItem
                                         key={job.id}
@@ -171,7 +200,7 @@ export function DynamicResumePreview({ overrideConfig }: DynamicResumePreviewPro
                         {/* Skills and Education in simplified grid for Bold layout */}
                         <div className="grid grid-cols-2 gap-8">
                             {education.length > 0 && (
-                                <ResumeSection title="Education" themeConfig={templateConfig} variant="boxed">
+                                <ResumeSection title="Education" themeConfig={templateConfig} variant="boxed" icon={GraduationCap}>
                                     {education.map(edu => (
                                         <ResumeItem
                                             key={edu.id}
@@ -185,7 +214,7 @@ export function DynamicResumePreview({ overrideConfig }: DynamicResumePreviewPro
                                 </ResumeSection>
                             )}
                             {skills.length > 0 && (
-                                <ResumeSection title="Expertise" themeConfig={templateConfig} variant="boxed">
+                                <ResumeSection title="Expertise" themeConfig={templateConfig} variant="boxed" icon={Wrench}>
                                     <div className="flex flex-wrap gap-2">
                                         {skills.map((skill) => (
                                             <span
@@ -220,7 +249,10 @@ export function DynamicResumePreview({ overrideConfig }: DynamicResumePreviewPro
                     <div>
                         {summary && (
                             <section className="mb-8 border-b border-slate-200 pb-6">
-                                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 mb-2">Profile</h3>
+                                <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-slate-900 mb-2">
+                                    <User className="w-4 h-4 text-slate-500" />
+                                    Profile
+                                </h3>
                                 <p className="text-sm text-slate-700 leading-relaxed">
                                     {summary}
                                 </p>
@@ -228,7 +260,7 @@ export function DynamicResumePreview({ overrideConfig }: DynamicResumePreviewPro
                         )}
 
                         {experience.length > 0 && (
-                            <ResumeSection title="Professional Experience" themeConfig={templateConfig} variant="minimal">
+                            <ResumeSection title="Professional Experience" themeConfig={templateConfig} variant="minimal" icon={Briefcase}>
                                 {experience.map(job => (
                                     <ResumeItem
                                         key={job.id}
@@ -248,7 +280,9 @@ export function DynamicResumePreview({ overrideConfig }: DynamicResumePreviewPro
                     <div className="space-y-8">
                         {skills.length > 0 && (
                             <section>
-                                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 mb-3 border-b-2 border-slate-900 pb-1">Skills</h3>
+                                <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-slate-900 mb-3 border-b-2 border-slate-900 pb-1">
+                                    <Wrench className="w-4 h-4" /> Skills
+                                </h3>
                                 <div className="space-y-2">
                                     {skills.map((skill) => (
                                         <div key={skill.id} className="text-sm">
@@ -262,7 +296,9 @@ export function DynamicResumePreview({ overrideConfig }: DynamicResumePreviewPro
 
                         {education.length > 0 && (
                             <section>
-                                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 mb-3 border-b-2 border-slate-900 pb-1">Education</h3>
+                                <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-slate-900 mb-3 border-b-2 border-slate-900 pb-1">
+                                    <GraduationCap className="w-4 h-4" /> Education
+                                </h3>
                                 {education.map(edu => (
                                     <div key={edu.id} className="mb-4">
                                         <div className="font-bold text-slate-800 text-sm">{edu.school}</div>
@@ -300,7 +336,7 @@ export function DynamicResumePreview({ overrideConfig }: DynamicResumePreviewPro
 
             <div className="space-y-2">
                 {experience.length > 0 && (
-                    <ResumeSection title="Experience" themeConfig={templateConfig} variant={isCenteredLayout ? "minimal" : "default"}>
+                    <ResumeSection title="Experience" themeConfig={templateConfig} variant={isCenteredLayout ? "minimal" : "default"} icon={Briefcase}>
                         {experience.map(job => (
                             <ResumeItem
                                 key={job.id}
@@ -316,7 +352,7 @@ export function DynamicResumePreview({ overrideConfig }: DynamicResumePreviewPro
                 )}
 
                 {education.length > 0 && (
-                    <ResumeSection title="Education" themeConfig={templateConfig} variant={isCenteredLayout ? "minimal" : "default"}>
+                    <ResumeSection title="Education" themeConfig={templateConfig} variant={isCenteredLayout ? "minimal" : "default"} icon={GraduationCap}>
                         {education.map(edu => (
                             <ResumeItem
                                 key={edu.id}
@@ -331,7 +367,7 @@ export function DynamicResumePreview({ overrideConfig }: DynamicResumePreviewPro
                 )}
 
                 {skills.length > 0 && (
-                    <ResumeSection title="Skills" themeConfig={templateConfig} variant={isCenteredLayout ? "minimal" : "default"}>
+                    <ResumeSection title="Skills" themeConfig={templateConfig} variant={isCenteredLayout ? "minimal" : "default"} icon={Wrench}>
                         <div className={cn("flex flex-wrap gap-2", isCenteredLayout && "justify-center")}>
                             {skills.map((skill) => (
                                 <span

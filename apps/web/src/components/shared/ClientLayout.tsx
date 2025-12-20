@@ -5,7 +5,7 @@ import Navbar from "./Navbar";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
-    const isBuilder = pathname.startsWith("/builder");
+    const isBuilder = pathname.startsWith("/resume");
 
     return (
         <>

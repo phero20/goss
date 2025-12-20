@@ -15,7 +15,7 @@ export function SummaryForm() {
     };
 
     return (
-        <div className="max-w-3xl mx-auto space-y-8">
+        <div className="max-w-3xl mx-auto space-y-8 pt-24 px-6">
             <div className="space-y-2">
                 <h1 className="text-3xl font-bold tracking-tight text-foreground">
                     Briefly describe yourself
