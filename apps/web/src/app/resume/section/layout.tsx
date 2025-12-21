@@ -87,12 +87,12 @@ export default function SectionLayout({ children }: { children: React.ReactNode 
                         <div className="pt-8 border-t border-primary-foreground/20">
                             <div className="flex items-center justify-between text-xs uppercase tracking-wider text-primary-foreground/80 font-semibold mb-2">
                                 <span>Completeness</span>
-                                <span>{Math.round(((currentStepOrder - 1) / steps.length) * 100)}%</span>
+                                <span>{Math.round(((currentStepOrder - 1) / (steps.length - 1)) * 100)}%</span>
                             </div>
                             <div className="h-2 w-full bg-primary-foreground/20 rounded-full overflow-hidden">
                                 <div
                                     className="h-full bg-primary-foreground transition-all duration-300"
-                                    style={{ width: `${Math.round(((currentStepOrder - 1) / steps.length) * 100)}%` }}
+                                    style={{ width: `${Math.round(((currentStepOrder - 1) / (steps.length - 1)) * 100)}%` }}
                                 ></div>
                             </div>
                         </div>

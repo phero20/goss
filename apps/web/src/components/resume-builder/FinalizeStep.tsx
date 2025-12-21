@@ -9,9 +9,21 @@ import { AppDispatch, RootState } from "@/redux/store";
 import { updateTemplateConfig } from "@/redux/features/resumeSlice";
 import { cn } from "@/lib/utils";
 
+// Recommended / Popular
 const templates = [
+    { id: "ivy", name: "Ivy League", description: "Standard, serif font, text-focused." },
+    { id: "executive", name: "Executive Suite", description: "Professional, with photo header." },
     { id: "modern", name: "Modern Professional", description: "Clean and balanced." },
-    { id: "sidebar", name: "Creative Sidebar", description: " distinct side column." },
+    { id: "classic", name: "Classic Professional", description: "Traditional, horizontal lines, centered." },
+
+    // Modern & Creative
+    { id: "timeline", name: "Timeline Modern", description: "Dark header, vertical timeline." },
+    { id: "creative", name: "Creative Split", description: "Modern sidebar with large photo." },
+    { id: "right-sidebar", name: "Right Sidebar", description: "Content left, dark info column right." },
+    { id: "sidebar", name: "Creative Sidebar", description: "Clean distinct side column." },
+
+    // Minimal & Specialized
+    { id: "minimal-photo", name: "Minimal Photo", description: "Clean, centered with profile picture." },
     { id: "minimal", name: "Elegant Minimal", description: "Centered, ample whitespace." },
     { id: "technical", name: "Technical Compact", description: "Data-dense, 2-column body." },
     { id: "bold", name: "Bold Modern", description: "High impact color header." },
