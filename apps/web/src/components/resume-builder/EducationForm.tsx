@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2, GraduationCap, ChevronDown, ChevronUp, Check } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
+
 import { cn } from "@/lib/utils";
 
 // Helper Component for University Autocomplete
@@ -438,6 +439,7 @@ export function EducationForm() {
                                         id={`location-${edu.id}`}
                                         value={edu.location}
                                         onChange={(val) => handleChange(edu.id, "location", val)}
+                                        
                                     />
                                 </div>
                             </div>

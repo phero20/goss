@@ -12,6 +12,9 @@ import { Plus, Trash2, Briefcase, ChevronDown, ChevronUp } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
 import { cn } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
+import { LocationAutocomplete } from "@/components/ui/LocationAutocomplete";
+import { JobTitleAutocomplete } from "@/components/ui/JobTitleAutocomplete";
+import { CompanyAutocomplete } from "@/components/ui/CompanyAutocomplete";
 
 export function ExperienceForm() {
     const dispatch = useDispatch<AppDispatch>();
@@ -115,22 +118,20 @@ export function ExperienceForm() {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                                     <div className="space-y-3">
                                         <Label htmlFor={`jobTitle-${exp.id}`} className="text-sm font-medium">Job Title</Label>
-                                        <Input
+                                        <JobTitleAutocomplete
                                             id={`jobTitle-${exp.id}`}
                                             value={exp.jobTitle}
-                                            onChange={(e) => handleChange(exp.id, "jobTitle", e.target.value)}
-                                            placeholder="e.g. Senior Software Engineer"
-                                            className="h-14 bg-background text-base"
+                                            onChange={(val) => handleChange(exp.id, "jobTitle", val)}
+                                            className="h-14 text-base"
                                         />
                                     </div>
                                     <div className="space-y-3">
                                         <Label htmlFor={`company-${exp.id}`} className="text-sm font-medium">Company</Label>
-                                        <Input
+                                        <CompanyAutocomplete
                                             id={`company-${exp.id}`}
                                             value={exp.company}
-                                            onChange={(e) => handleChange(exp.id, "company", e.target.value)}
-                                            placeholder="e.g. Google"
-                                            className="h-14 bg-background text-base"
+                                            onChange={(val) => handleChange(exp.id, "company", val)}
+                                            className="h-14 text-base"
                                         />
                                     </div>
                                 </div>
@@ -158,14 +159,17 @@ export function ExperienceForm() {
                                     </div>
                                 </div>
 
+
+
+                               
+
                                 <div className="space-y-3 mt-6">
                                     <Label htmlFor={`location-${exp.id}`} className="text-sm font-medium">Location</Label>
-                                    <Input
+                                    <LocationAutocomplete
                                         id={`location-${exp.id}`}
                                         value={exp.location}
-                                        onChange={(e) => handleChange(exp.id, "location", e.target.value)}
-                                        placeholder="e.g. New York, NY"
-                                        className="h-14 bg-background text-base"
+                                        onChange={(val) => handleChange(exp.id, "location", val)}
+                                        className="h-14 text-base"
                                     />
                                 </div>
 

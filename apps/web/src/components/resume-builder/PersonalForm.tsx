@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { User, Briefcase, Mail, Phone, MapPin, Globe, Linkedin, Github, Plus } from "lucide-react";
 import Image from "next/image";
+import { LocationAutocomplete } from "@/components/ui/LocationAutocomplete";
+import { JobTitleAutocomplete } from "@/components/ui/JobTitleAutocomplete";
 
 export function PersonalForm() {
     const dispatch = useDispatch<AppDispatch>();
@@ -130,13 +132,15 @@ export function PersonalForm() {
                         </div>
                         <div className="space-y-3">
                             <Label htmlFor="jobTitle" className="text-sm font-medium">Job Title</Label>
-                            <Input
+                            <JobTitleAutocomplete
                                 id="jobTitle"
-                                name="jobTitle"
                                 value={formData.jobTitle}
-                                onChange={handleChange}
-                                placeholder="e.g. Retail Sales Associate"
-                                className="h-14 bg-background text-base"
+                                onChange={(val) => {
+                                    const newData = { ...formData, jobTitle: val };
+                                    setFormData(newData);
+                                    dispatch(updatePersonalInfo({ jobTitle: val }));
+                                }}
+                                className="h-14 text-base"
                             />
                         </div>
                     </div>
@@ -167,15 +171,21 @@ export function PersonalForm() {
                         </div>
                     </div>
 
+
+
+
                     <div className="space-y-3">
                         <Label htmlFor="location" className="text-sm font-medium">Location</Label>
-                        <Input
+                        <LocationAutocomplete
                             id="location"
-                            name="location"
                             value={formData.location}
-                            onChange={handleChange}
+                            onChange={(val) => {
+                                const newData = { ...formData, location: val };
+                                setFormData(newData);
+                                dispatch(updatePersonalInfo({ location: val }));
+                            }}
                             placeholder="Hyderabad, India"
-                            className="h-14 bg-background text-base"
+                            className="h-14 text-base"
                         />
                     </div>
 

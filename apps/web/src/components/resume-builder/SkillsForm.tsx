@@ -17,6 +17,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { SkillsAutocomplete } from "@/components/ui/SkillsAutocomplete";
 
 export function SkillsForm() {
     const dispatch = useDispatch<AppDispatch>();
@@ -76,12 +77,11 @@ export function SkillsForm() {
                             <div className="flex-1 grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-4">
                                 <div className="space-y-1">
                                     <Label htmlFor={`skill-name-${skill.id}`} className="sr-only">Skill Name</Label>
-                                    <Input
+                                    <SkillsAutocomplete
                                         id={`skill-name-${skill.id}`}
                                         value={skill.name}
-                                        onChange={(e) => handleChange(skill.id, "name", e.target.value)}
-                                        placeholder="e.g. Project Management"
-                                        className="h-12 bg-background border-2 border-border hover:border-primary/50 focus:border-primary transition-colors"
+                                        onChange={(val) => handleChange(skill.id, "name", val)}
+                                        className="h-12 border-2 border-border hover:border-primary/50 focus:border-primary transition-colors text-base"
                                     />
                                 </div>
                                 <div className="space-y-1">
