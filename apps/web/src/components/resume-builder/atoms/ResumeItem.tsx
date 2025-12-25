@@ -32,7 +32,7 @@ export function ResumeItem({ title, subtitle, date, location, description, theme
                 )}
             </div>
             {description && (
-                <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
+                <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap break-words">
                     {description}
                 </p>
             )}

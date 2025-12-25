@@ -110,7 +110,7 @@ export function DynamicResumePreview({ overrideConfig }: DynamicResumePreviewPro
                 <div className="p-8 md:p-12 bg-white h-full min-h-[inherit]">
                     {summary && (
                         <ResumeSection title="Profile" themeConfig={templateConfig} icon={User}>
-                            <p className="text-sm text-slate-700 leading-relaxed">{summary}</p>
+                            <p className="text-sm text-slate-700 leading-relaxed break-words whitespace-pre-wrap">{summary}</p>
                         </ResumeSection>
                     )}
 
@@ -175,7 +175,7 @@ export function DynamicResumePreview({ overrideConfig }: DynamicResumePreviewPro
                 <div className="p-12 -mt-8 bg-white rounded-t-xl mx-4 min-h-[inherit]">
                     {summary && (
                         <section className="mb-10">
-                            <p className="text-base text-slate-700 leading-relaxed font-medium">
+                            <p className="text-base text-slate-700 leading-relaxed font-medium break-words whitespace-pre-wrap">
                                 {summary}
                             </p>
                         </section>
@@ -246,14 +246,14 @@ export function DynamicResumePreview({ overrideConfig }: DynamicResumePreviewPro
 
                 <div className="grid grid-cols-[2fr_1fr] gap-8">
                     {/* Main Column */}
-                    <div>
+                    <div className="min-w-0">
                         {summary && (
                             <section className="mb-8 border-b border-slate-200 pb-6">
                                 <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-slate-900 mb-2">
                                     <User className="w-4 h-4 text-slate-500" />
                                     Profile
                                 </h3>
-                                <p className="text-sm text-slate-700 leading-relaxed">
+                                <p className="text-sm text-slate-700 leading-relaxed break-words whitespace-pre-wrap">
                                     {summary}
                                 </p>
                             </section>
@@ -285,7 +285,7 @@ export function DynamicResumePreview({ overrideConfig }: DynamicResumePreviewPro
                                 </h3>
                                 <div className="space-y-2">
                                     {skills.map((skill) => (
-                                        <div key={skill.id} className="text-sm">
+                                        <div key={skill.id} className="text-sm break-words whitespace-pre-wrap">
                                             <span className="font-semibold text-slate-800 block">{skill.name}</span>
                                             <span className="text-slate-500 text-xs">{skill.level}</span>
                                         </div>
@@ -301,8 +301,8 @@ export function DynamicResumePreview({ overrideConfig }: DynamicResumePreviewPro
                                 </h3>
                                 {education.map(edu => (
                                     <div key={edu.id} className="mb-4">
-                                        <div className="font-bold text-slate-800 text-sm">{edu.school}</div>
-                                        <div className="text-slate-600 text-sm mb-1">{edu.degree}</div>
+                                        <div className="font-bold text-slate-800 text-sm break-words whitespace-pre-wrap">{edu.school}</div>
+                                        <div className="text-slate-600 text-sm mb-1 break-words whitespace-pre-wrap">{edu.degree}</div>
                                         <div className="text-slate-400 text-xs italic">{edu.endDate}</div>
                                     </div>
                                 ))}
@@ -322,8 +322,8 @@ export function DynamicResumePreview({ overrideConfig }: DynamicResumePreviewPro
                 {/* Header Bar */}
                 <div className="bg-slate-900 text-white p-12 py-16 flex items-center justify-between" style={{ backgroundColor: templateConfig.color }}>
                     <div className="space-y-2 max-w-2xl">
-                        <h1 className="text-4xl font-bold tracking-tight">{personalInfo.fullName}</h1>
-                        <p className="text-xl opacity-90 font-medium">{personalInfo.jobTitle}</p>
+                        <h1 className="text-4xl font-bold tracking-tight break-words whitespace-pre-wrap">{personalInfo.fullName}</h1>
+                        <p className="text-xl opacity-90 font-medium break-words whitespace-pre-wrap">{personalInfo.jobTitle}</p>
 
                         <div className="flex flex-wrap gap-4 text-sm opacity-80 pt-4 mt-4 border-t border-white/20">
                             {personalInfo.email && <span className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5" />{personalInfo.email}</span>}
@@ -341,10 +341,10 @@ export function DynamicResumePreview({ overrideConfig }: DynamicResumePreviewPro
 
                 <div className="grid grid-cols-[2fr_1fr] min-h-[inherit]">
                     {/* Main Left Content */}
-                    <div className="p-10 space-y-8 bg-white">
+                    <div className="p-10 space-y-8 bg-white min-w-0">
                         {summary && (
                             <ResumeSection title="Executive Summary" themeConfig={templateConfig} icon={User}>
-                                <p className="text-sm text-slate-700 leading-relaxed font-medium">{summary}</p>
+                                <p className="text-sm text-slate-700 leading-relaxed font-medium break-words whitespace-pre-wrap">{summary}</p>
                             </ResumeSection>
                         )}
 
@@ -386,8 +386,8 @@ export function DynamicResumePreview({ overrideConfig }: DynamicResumePreviewPro
                             <ResumeSection title="Education" themeConfig={templateConfig} icon={GraduationCap} variant="minimal">
                                 {education.map(edu => (
                                     <div key={edu.id} className="mb-4 text-sm">
-                                        <div className="font-bold text-slate-900">{edu.school}</div>
-                                        <div className="text-slate-600">{edu.degree}</div>
+                                        <div className="font-bold text-slate-900 break-words whitespace-pre-wrap">{edu.school}</div>
+                                        <div className="text-slate-600 break-words whitespace-pre-wrap">{edu.degree}</div>
                                         <div className="text-slate-400 text-xs mt-1">{edu.startDate} - {edu.endDate}</div>
                                     </div>
                                 ))}
@@ -398,13 +398,13 @@ export function DynamicResumePreview({ overrideConfig }: DynamicResumePreviewPro
                             {personalInfo.linkedin && (
                                 <div className="flex items-center gap-2">
                                     <Linkedin className="w-3.5 h-3.5" />
-                                    <span className="truncate">{personalInfo.linkedin}</span>
+                                    <span className="break-all">{personalInfo.linkedin}</span>
                                 </div>
                             )}
                             {personalInfo.website && (
                                 <div className="flex items-center gap-2">
                                     <Globe className="w-3.5 h-3.5" />
-                                    <span className="truncate">{personalInfo.website}</span>
+                                    <span className="break-all">{personalInfo.website}</span>
                                 </div>
                             )}
                         </div>
@@ -485,7 +485,7 @@ export function DynamicResumePreview({ overrideConfig }: DynamicResumePreviewPro
                     {summary && (
                         <div className="mb-10">
                             <h3 className="text-xl font-bold text-slate-900 border-b-2 pb-2 mb-4" style={{ borderColor: templateConfig.color }}>Profile</h3>
-                            <p className="text-slate-700 leading-relaxed font-medium">{summary}</p>
+                            <p className="text-slate-700 leading-relaxed font-medium break-words whitespace-pre-wrap">{summary}</p>
                         </div>
                     )}
 
@@ -501,7 +501,7 @@ export function DynamicResumePreview({ overrideConfig }: DynamicResumePreviewPro
                                             <span className="text-xs font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded">{job.startDate} – {job.endDate}</span>
                                         </div>
                                         <div className="text-base font-semibold text-slate-600 mb-2">{job.company}, {job.location}</div>
-                                        <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">{job.description}</p>
+                                        <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap break-words">{job.description}</p>
                                     </div>
                                 ))}
                             </div>
@@ -525,8 +525,8 @@ export function DynamicResumePreview({ overrideConfig }: DynamicResumePreviewPro
                     )}
 
                     <div className="space-y-2">
-                        <h1 className="text-4xl font-light tracking-tight text-slate-900">{personalInfo.fullName}</h1>
-                        <p className="text-lg text-slate-500 uppercase tracking-widest font-normal">{personalInfo.jobTitle}</p>
+                        <h1 className="text-4xl font-light tracking-tight text-slate-900 break-words whitespace-pre-wrap">{personalInfo.fullName}</h1>
+                        <p className="text-lg text-slate-500 uppercase tracking-widest font-normal break-words whitespace-pre-wrap">{personalInfo.jobTitle}</p>
                     </div>
 
                     <div className="flex flex-wrap justify-center gap-4 text-sm text-slate-500">
@@ -538,7 +538,7 @@ export function DynamicResumePreview({ overrideConfig }: DynamicResumePreviewPro
 
                 {summary && (
                     <div className="mb-8 text-center max-w-2xl mx-auto">
-                        <p className="text-slate-600 leading-relaxed">
+                        <p className="text-slate-600 leading-relaxed break-words whitespace-pre-wrap">
                             {summary}
                         </p>
                     </div>
@@ -559,10 +559,10 @@ export function DynamicResumePreview({ overrideConfig }: DynamicResumePreviewPro
                                         <div className="text-sm font-bold text-slate-800">{job.startDate} - {job.endDate}</div>
                                         <div className="text-xs text-slate-500 mt-1">{job.location}</div>
                                     </div>
-                                    <div>
+                                    <div className="min-w-0">
                                         <h4 className="font-bold text-lg text-slate-900">{job.jobTitle}</h4>
                                         <div className="text-sm font-semibold mb-2" style={{ color: templateConfig.color }}>{job.company}</div>
-                                        <p className="text-sm text-slate-600 leading-relaxed">{job.description}</p>
+                                        <p className="text-sm text-slate-600 leading-relaxed break-words whitespace-pre-wrap">{job.description}</p>
                                     </div>
                                 </div>
                             ))}
@@ -579,8 +579,8 @@ export function DynamicResumePreview({ overrideConfig }: DynamicResumePreviewPro
                         <div>
                             {education.map(edu => (
                                 <div key={edu.id} className="mb-4">
-                                    <div className="font-bold text-slate-900">{edu.school}</div>
-                                    <div className="text-sm text-slate-600">{edu.degree}</div>
+                                    <div className="font-bold text-slate-900 break-words whitespace-pre-wrap">{edu.school}</div>
+                                    <div className="text-sm text-slate-600 break-words whitespace-pre-wrap">{edu.degree}</div>
                                     <div className="text-xs text-slate-400 mt-1">{edu.startDate} - {edu.endDate}</div>
                                 </div>
                             ))}
@@ -627,7 +627,7 @@ export function DynamicResumePreview({ overrideConfig }: DynamicResumePreviewPro
                 {personalInfo.jobTitle && (
                     <div className="text-center mb-6">
                         <h2 className="text-xl font-bold uppercase tracking-wider mb-3 text-slate-800">{personalInfo.jobTitle}</h2>
-                        {summary && <p className="text-center text-slate-700 max-w-3xl mx-auto leading-relaxed">{summary}</p>}
+                        {summary && <p className="text-center text-slate-700 max-w-3xl mx-auto leading-relaxed break-words whitespace-pre-wrap">{summary}</p>}
                     </div>
                 )}
 
@@ -657,7 +657,7 @@ export function DynamicResumePreview({ overrideConfig }: DynamicResumePreviewPro
                                         <span className="font-bold text-slate-900 text-sm whitespace-nowrap">{job.startDate} – {job.endDate}</span>
                                     </div>
                                     <div className="font-bold text-slate-700 mb-2">{job.company}, {job.location}</div>
-                                    <p className="text-slate-700 leading-relaxed text-sm whitespace-pre-wrap">{job.description}</p>
+                                    <p className="text-slate-700 leading-relaxed text-sm whitespace-pre-wrap break-words">{job.description}</p>
                                 </div>
                             ))}
                         </div>
@@ -707,7 +707,7 @@ export function DynamicResumePreview({ overrideConfig }: DynamicResumePreviewPro
                 {summary && (
                     <div className="mb-6">
                         <h3 className="uppercase tracking-widest text-sm font-bold border-b border-gray-300 mb-3 pb-1">Summary</h3>
-                        <p className="text-sm leading-relaxed text-justify">{summary}</p>
+                        <p className="text-sm leading-relaxed text-justify break-words whitespace-pre-wrap">{summary}</p>
                     </div>
                 )}
 
@@ -725,7 +725,7 @@ export function DynamicResumePreview({ overrideConfig }: DynamicResumePreviewPro
                                         <span className="italic text-sm font-semibold">{job.jobTitle}</span>
                                         <span className="text-sm">{job.location}</span>
                                     </div>
-                                    <p className="text-sm leading-relaxed text-justify">{job.description}</p>
+                                    <p className="text-sm leading-relaxed text-justify break-words whitespace-pre-wrap">{job.description}</p>
                                 </div>
                             ))}
                         </div>
@@ -795,7 +795,7 @@ export function DynamicResumePreview({ overrideConfig }: DynamicResumePreviewPro
                                 <User className="w-4 h-4" />
                             </div>
                             <h3 className="text-lg font-bold uppercase tracking-wider mb-2 text-slate-800">Profile</h3>
-                            <p className="text-slate-700 leading-relaxed text-sm">{summary}</p>
+                            <p className="text-slate-700 leading-relaxed text-sm break-words whitespace-pre-wrap">{summary}</p>
                         </div>
                     )}
 
@@ -816,7 +816,7 @@ export function DynamicResumePreview({ overrideConfig }: DynamicResumePreviewPro
                                             <span className="text-xs font-bold text-slate-500 whitespace-nowrap">{job.startDate} – {job.endDate}</span>
                                         </div>
                                         <div className="text-sm font-semibold text-slate-600 mb-2">{job.company}, {job.location}</div>
-                                        <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">{job.description}</p>
+                                        <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap break-words">{job.description}</p>
                                     </div>
                                 ))}
                             </div>
@@ -873,7 +873,7 @@ export function DynamicResumePreview({ overrideConfig }: DynamicResumePreviewPro
                     {summary && (
                         <div className="mb-6">
                             <h3 className="text-xl font-bold text-slate-800 border-b-2 border-slate-200 pb-2 mb-4" style={{ borderColor: templateConfig.color }}>Professional Summary</h3>
-                            <p className="text-sm text-slate-700 leading-relaxed font-medium text-justify">{summary}</p>
+                            <p className="text-sm text-slate-700 leading-relaxed font-medium text-justify break-words whitespace-pre-wrap">{summary}</p>
                         </div>
                     )}
 
@@ -890,7 +890,7 @@ export function DynamicResumePreview({ overrideConfig }: DynamicResumePreviewPro
                                         <div className="text-sm font-semibold text-slate-600 mb-2 italic">{job.company}, {job.location}</div>
                                         <ul className="list-disc ml-4 space-y-1">
                                             {job.description.split('\n').map((line, i) => (
-                                                line.trim() && <li key={i} className="text-xs text-slate-700 leading-relaxed pl-1">{line.trim().replace(/^-\s*/, '')}</li>
+                                                line.trim() && <li key={i} className="text-xs text-slate-700 leading-relaxed pl-1 break-words whitespace-pre-wrap">{line.trim().replace(/^-\s*/, '')}</li>
                                             ))}
                                         </ul>
                                     </div>
@@ -995,7 +995,7 @@ export function DynamicResumePreview({ overrideConfig }: DynamicResumePreviewPro
             {summary && (
                 <section className="mb-8">
                     <p className={cn(
-                        "text-sm text-slate-700 leading-relaxed",
+                        "text-sm text-slate-700 leading-relaxed break-words whitespace-pre-wrap",
                         isCenteredLayout && "text-center max-w-2xl mx-auto italic"
                     )}>
                         {summary}
