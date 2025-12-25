@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Lightbulb, Loader2 } from "lucide-react";
+import { SKILLS } from "@/data/skills";
 
 interface SkillsAutocompleteProps {
     value: string;
@@ -22,11 +23,10 @@ export function SkillsAutocomplete({
 }: SkillsAutocompleteProps) {
     const [suggestions, setSuggestions] = useState<string[]>([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
     const wrapperRef = useRef<HTMLDivElement>(null);
 
-    // Debounce timer ref
-    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+    // Debounce timer ref - still useful for local filtering if list is huge, 
+    // but for <1000 items instant filtering is better. Removing debounce for snappiness.
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -38,51 +38,19 @@ export function SkillsAutocomplete({
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    const fetchSkills = async (query: string) => {
-        setIsLoading(true);
-        try {
-            // Using APILayer Skills API (Freemium)
-            // Note: This requires an API Key in your .env file: NEXT_PUBLIC_SKILLS_API_KEY
-            const apiKey = process.env.NEXT_PUBLIC_SKILLS_API_KEY || "YOUR_API_KEY_HERE";
-
-            const myHeaders = new Headers();
-            myHeaders.append("apikey", apiKey);
-
-            const requestOptions = {
-                method: 'GET',
-                headers: myHeaders,
-                redirect: 'follow' as RequestRedirect
-            };
-
-            const res = await fetch(`https://api.apilayer.com/skills?q=${encodeURIComponent(query)}&count=10`, requestOptions);
-
-            if (res.ok) {
-                const data = await res.json();
-                // APILayer returns array of strings
-                if (Array.isArray(data)) {
-                    setSuggestions(data);
-                    setShowSuggestions(data.length > 0);
-                }
-            } else {
-                // Fallback if key is missing or invalid to avoid breaking UI
-                console.warn("Skills API Error:", res.status);
-            }
-        } catch (e) {
-            console.error("Failed to fetch skills", e);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
     const handleInput = (input: string) => {
         onChange(input);
 
-        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        if (input.length > 0) {
+            const lowerInput = input.toLowerCase();
+            // Filter skills that include the input text
+            const filtered = SKILLS.filter(skill =>
+                skill.toLowerCase().includes(lowerInput) &&
+                skill.toLowerCase() !== lowerInput // Don't show if already exact match
+            ).slice(0, 10); // Limit to 10 suggestions
 
-        if (input.length > 1) {
-            timeoutRef.current = setTimeout(() => {
-                fetchSkills(input);
-            }, 400); // 400ms debounce
+            setSuggestions(filtered);
+            setShowSuggestions(filtered.length > 0);
         } else {
             setSuggestions([]);
             setShowSuggestions(false);
@@ -101,11 +69,7 @@ export function SkillsAutocomplete({
                     autoComplete="off"
                 />
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
-                    {isLoading ? (
-                        <Loader2 className="w-4 h-4 animate-spin opacity-50" />
-                    ) : (
-                        <Lightbulb className="w-4 h-4 opacity-50" />
-                    )}
+                    <Lightbulb className="w-4 h-4 opacity-50" />
                 </div>
             </div>
 
@@ -128,3 +92,4 @@ export function SkillsAutocomplete({
         </div>
     );
 }
+
