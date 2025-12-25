@@ -53,6 +53,9 @@ export function ExperienceForm() {
     const handleChange = (id: string, field: keyof Experience, value: string) => {
         const exp = experiences.find(e => e.id === id);
         if (exp) {
+            // Enforce character limit for description
+            if (field === "description" && value.length > 200) return;
+
             dispatch(updateExperience({ ...exp, [field]: value }));
         }
     };
@@ -182,6 +185,11 @@ export function ExperienceForm() {
                                         placeholder="Describe your responsibilities and achievements..."
                                         className="min-h-[150px] bg-background text-base resize-none"
                                     />
+                                    <div className="flex justify-end">
+                                        <p className={cn("text-xs", (exp.description?.length || 0) >= 200 ? "text-destructive font-medium" : "text-muted-foreground")}>
+                                            {exp.description?.length || 0} / 200 characters
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         )}

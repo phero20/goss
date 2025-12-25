@@ -3,8 +3,12 @@
 import { usePathname, useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/common/ProtectedRoute";
 import { cn } from "@/lib/utils";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Loader2, Cloud } from "lucide-react"; // Added Icons
 import { Button } from "@/components/ui/button";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/redux/store";
+import { saveResume, fetchResume } from "@/redux/features/resumeSlice";
+import { useEffect } from "react";
 
 const steps = [
     { id: "personal", title: "Heading", order: 1 },
@@ -18,6 +22,11 @@ const steps = [
 export default function SectionLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const router = useRouter();
+    const dispatch = useDispatch<AppDispatch>();
+    const isSaving = useSelector((state: RootState) => state.resume.isSaving);
+    const lastSaved = useSelector((state: RootState) => state.resume.lastSaved);
+
+    const isDirty = useSelector((state: RootState) => state.resume.isDirty);
 
     // Determine current step based on URL
     const currentStepId = steps.find(step => pathname.includes(step.id))?.id || "personal";
@@ -27,17 +36,30 @@ export default function SectionLayout({ children }: { children: React.ReactNode 
     const currentStepOrder = currentStepIndex + 1;
     const isFinalizeStep = currentStepId === "finalize";
 
+    useEffect(() => {
+        // Fetch resume data on mount to hydrate state (e.g. on refresh)
+        dispatch(fetchResume());
+    }, [dispatch]);
+
+    const autoSaveAndNavigate = async (path: string) => {
+        // Only save if dirty OR if we are finalizing (to be safe)
+        if (isDirty || isFinalizeStep) {
+            dispatch(saveResume());
+        }
+        router.push(path);
+    };
+
     const handleNext = () => {
         if (currentStepIndex < steps.length - 1) {
             const nextStepId = steps[currentStepIndex + 1].id;
-            router.push(`/resume/section/${nextStepId}`);
+            autoSaveAndNavigate(`/resume/section/${nextStepId}`);
         }
     };
 
     const handleBack = () => {
         if (currentStepIndex > 0) {
             const prevStepId = steps[currentStepIndex - 1].id;
-            router.push(`/resume/section/${prevStepId}`);
+            autoSaveAndNavigate(`/resume/section/${prevStepId}`);
         }
     };
 
@@ -47,6 +69,21 @@ export default function SectionLayout({ children }: { children: React.ReactNode 
                 {/* Left Sidebar - Navigation */}
                 <aside className="w-64 border-r border-border bg-primary hidden lg:block fixed h-screen left-0 top-0 overflow-y-auto z-10 print:hidden">
                     <div className="p-6 space-y-8">
+                        {/* Saving Status Indicator */}
+                        <div className="flex items-center gap-2 text-primary-foreground/70 text-xs font-medium">
+                            {isSaving ? (
+                                <>
+                                    <Loader2 className="w-3 h-3 animate-spin" />
+                                    <span>Saving...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <Cloud className="w-3 h-3" />
+                                    <span>{lastSaved ? "Saved" : "Ready"}</span>
+                                </>
+                            )}
+                        </div>
+
                         <div className="space-y-2">
                             {steps.map((step, index) => {
                                 const stepStatus =
@@ -56,7 +93,7 @@ export default function SectionLayout({ children }: { children: React.ReactNode 
                                 return (
                                     <div
                                         key={step.id}
-                                        onClick={() => router.push(`/resume/section/${step.id}`)}
+                                        onClick={() => autoSaveAndNavigate(`/resume/section/${step.id}`)}
                                         className={cn(
                                             "flex items-center gap-3 p-3 rounded-lg transition-colors cursor-pointer",
                                             stepStatus === "current"

@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
-import { updatePersonalInfo } from "@/redux/features/resumeSlice";
+import { updatePersonalInfo, saveResume } from "@/redux/features/resumeSlice";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,8 @@ import Image from "next/image";
 import { LocationAutocomplete } from "@/components/resume-builder/autocomplete/LocationAutocomplete";
 import { JobTitleAutocomplete } from "@/components/resume-builder/autocomplete/JobTitleAutocomplete";
 import { SkillsAutocomplete } from "@/components/resume-builder/autocomplete/SkillsAutocomplete";
+import api from "@/lib/axios";
+import axios from "axios";
 
 export function PersonalForm() {
     const dispatch = useDispatch<AppDispatch>();
@@ -37,13 +39,46 @@ export function PersonalForm() {
         dispatch(updatePersonalInfo({ [name]: value }));
     };
 
-    const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            const imageUrl = URL.createObjectURL(file);
-            const newData = { ...formData, photoUrl: imageUrl };
-            setFormData(newData);
-            dispatch(updatePersonalInfo({ photoUrl: imageUrl }));
+            // Optimistic preview
+            const tempUrl = URL.createObjectURL(file);
+            setFormData(prev => ({ ...prev, photoUrl: tempUrl }));
+
+            const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+            const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+
+            if (!cloudName || !uploadPreset) {
+                console.error("Cloudinary credentials missing. Please set NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME and NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET");
+                alert("Cloudinary not configured!");
+                return;
+            }
+
+            try {
+                // Cloudinary Upload
+                const formData = new FormData();
+                formData.append("file", file);
+                formData.append("upload_preset", uploadPreset);
+
+                const response = await axios.post(
+                    `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+                    formData
+                );
+
+                const publicUrl = response.data.secure_url;
+
+                // 3. Update State with real Public URL
+                setFormData(prev => ({ ...prev, photoUrl: publicUrl }));
+                dispatch(updatePersonalInfo({ photoUrl: publicUrl }));
+
+                // Immediately save the resume to persist the photo URL link
+                dispatch(saveResume());
+            } catch (error) {
+                console.error("Cloudinary upload failed", error);
+                // Revert optimistic update if needed, or show error
+                alert("Failed to upload image.");
+            }
         }
     };
 

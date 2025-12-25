@@ -5,13 +5,17 @@ import { AppDispatch, RootState } from "@/redux/store";
 import { updateSummary } from "@/redux/features/resumeSlice";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 
 export function SummaryForm() {
     const dispatch = useDispatch<AppDispatch>();
     const summary = useSelector((state: RootState) => state.resume.summary);
 
     const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        dispatch(updateSummary(e.target.value));
+        const value = e.target.value;
+        if (value.length <= 500) {
+            dispatch(updateSummary(value));
+        }
     };
 
     return (
@@ -36,8 +40,8 @@ export function SummaryForm() {
                         className="min-h-[300px] text-base p-4 leading-relaxed resize-none bg-background border-2 border-border focus:border-primary transition-all duration-200"
                     />
                     <div className="flex justify-end">
-                        <p className="text-xs text-muted-foreground">
-                            {summary.length} characters
+                        <p className={cn("text-xs", summary.length >= 500 ? "text-destructive font-medium" : "text-muted-foreground")}>
+                            {summary.length} / 500 characters
                         </p>
                     </div>
                 </div>

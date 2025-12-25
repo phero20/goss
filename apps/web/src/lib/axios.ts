@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { store } from '@/redux/store';
 
 const api = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080',
@@ -10,9 +9,12 @@ const api = axios.create({
 
 api.interceptors.request.use(
     (config) => {
-        const token = store.getState().auth.token;
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
+        // Access token from localStorage directly to avoid circular dependency with store
+        if (typeof window !== 'undefined') {
+            const token = localStorage.getItem('token');
+            if (token) {
+                config.headers.Authorization = `Bearer ${token}`;
+            }
         }
         return config;
     },

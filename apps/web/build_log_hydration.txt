@@ -1,0 +1,2 @@
+src/redux/features/resumeSlice.ts(154,18): error TS1005: ':' expected.
+src/redux/features/resumeSlice.ts(164,6): error TS1005: ',' expected.
