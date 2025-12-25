@@ -28,6 +28,7 @@
     "react": "19.2.1",
     "react-dom": "19.2.1",
     "react-redux": "^9.2.0",
+    "react-to-print": "^3.2.0",
     "styled-jsx": "^5.1.7",
     "tailwind-merge": "^3.4.0",
     "tailwindcss-animate": "^1.0.7",

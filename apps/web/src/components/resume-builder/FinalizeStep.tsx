@@ -5,6 +5,7 @@ import { DynamicResumePreview } from "./DynamicResumePreview";
 import { Button } from "@/components/ui/button";
 import { Download, Printer, Palette, ArrowLeft, Check } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
+import { useReactToPrint } from "react-to-print";
 import { AppDispatch, RootState } from "@/redux/store";
 import { updateTemplateConfig } from "@/redux/features/resumeSlice";
 import { cn } from "@/lib/utils";
@@ -197,11 +198,15 @@ function AutoZoomWrapper({ children }: { children: ReactNode }) {
 export function FinalizeStep() {
     const dispatch = useDispatch<AppDispatch>();
     const templateConfig = useSelector((state: RootState) => state.resume.templateConfig);
+    const personalInfo = useSelector((state: RootState) => state.resume.personalInfo);
     const [viewMode, setViewMode] = useState<"gallery" | "editor">("gallery");
 
-    const handlePrint = () => {
-        window.print();
-    };
+    const contentRef = useRef<HTMLDivElement>(null);
+
+    const handlePrint = useReactToPrint({
+        contentRef,
+        documentTitle: `Resume - ${personalInfo?.fullName || "Candidate"}`,
+    });
 
     const handleTemplateSelect = (id: string) => {
         dispatch(updateTemplateConfig({ id }));
@@ -363,7 +368,9 @@ export function FinalizeStep() {
             {/* Main Preview Area */}
             <div className="flex-1 overflow-y-auto overflow-x-hidden relative flex justify-center p-4 md:p-8">
                 <AutoZoomWrapper>
-                    <DynamicResumePreview />
+                    <div ref={contentRef}>
+                        <DynamicResumePreview />
+                    </div>
                 </AutoZoomWrapper>
             </div>
         </div>
