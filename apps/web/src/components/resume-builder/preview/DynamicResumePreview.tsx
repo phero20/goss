@@ -2,9 +2,9 @@
 
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
-import { ResumeHeader } from "./atoms/ResumeHeader";
-import { ResumeSection } from "./atoms/ResumeSection";
-import { ResumeItem } from "./atoms/ResumeItem";
+import { ResumeHeader } from "../atoms/ResumeHeader";
+import { ResumeSection } from "../atoms/ResumeSection";
+import { ResumeItem } from "../atoms/ResumeItem";
 import { cn } from "@/lib/utils";
 import { User, Briefcase, GraduationCap, Wrench, MapPin, Phone, Mail, Linkedin, Globe, Award } from "lucide-react";
 

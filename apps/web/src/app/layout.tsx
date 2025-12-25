@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 };
 
 import { ReduxProvider } from "@/redux/provider";
-import ClientLayout from "@/components/shared/ClientLayout";
+import ClientLayout from "@/components/layouts/ClientLayout";
 
 export default function RootLayout({
   children,

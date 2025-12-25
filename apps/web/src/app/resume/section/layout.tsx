@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import ProtectedRoute from "@/components/shared/ProtectedRoute";
+import ProtectedRoute from "@/components/common/ProtectedRoute";
 import { cn } from "@/lib/utils";
 import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";

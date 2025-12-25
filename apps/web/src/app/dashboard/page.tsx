@@ -1,5 +1,5 @@
 import Image from "next/image";
-import ProtectedRoute from "@/components/shared/ProtectedRoute";
+import ProtectedRoute from "@/components/common/ProtectedRoute";
 
 export default function DashboardPage() {
     return (

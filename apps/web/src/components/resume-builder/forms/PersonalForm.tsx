@@ -9,8 +9,9 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { User, Briefcase, Mail, Phone, MapPin, Globe, Linkedin, Github, Plus } from "lucide-react";
 import Image from "next/image";
-import { LocationAutocomplete } from "@/components/ui/LocationAutocomplete";
-import { JobTitleAutocomplete } from "@/components/ui/JobTitleAutocomplete";
+import { LocationAutocomplete } from "@/components/resume-builder/autocomplete/LocationAutocomplete";
+import { JobTitleAutocomplete } from "@/components/resume-builder/autocomplete/JobTitleAutocomplete";
+import { SkillsAutocomplete } from "@/components/resume-builder/autocomplete/SkillsAutocomplete";
 
 export function PersonalForm() {
     const dispatch = useDispatch<AppDispatch>();

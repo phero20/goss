@@ -1,6 +1,6 @@
 "use client";
 
-import { SummaryForm } from "@/components/resume-builder/SummaryForm";
+import { SummaryForm } from "@/components/resume-builder/forms/SummaryForm";
 
 export default function SummaryPage() {
     return <SummaryForm />;

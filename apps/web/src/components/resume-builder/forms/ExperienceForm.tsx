@@ -12,9 +12,9 @@ import { Plus, Trash2, Briefcase, ChevronDown, ChevronUp } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
 import { cn } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
-import { LocationAutocomplete } from "@/components/ui/LocationAutocomplete";
-import { JobTitleAutocomplete } from "@/components/ui/JobTitleAutocomplete";
-import { CompanyAutocomplete } from "@/components/ui/CompanyAutocomplete";
+import { LocationAutocomplete } from "@/components/resume-builder/autocomplete/LocationAutocomplete";
+import { JobTitleAutocomplete } from "@/components/resume-builder/autocomplete/JobTitleAutocomplete";
+import { CompanyAutocomplete } from "@/components/resume-builder/autocomplete/CompanyAutocomplete";
 
 export function ExperienceForm() {
     const dispatch = useDispatch<AppDispatch>();
@@ -161,7 +161,7 @@ export function ExperienceForm() {
 
 
 
-                               
+
 
                                 <div className="space-y-3 mt-6">
                                     <Label htmlFor={`location-${exp.id}`} className="text-sm font-medium">Location</Label>

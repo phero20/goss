@@ -17,7 +17,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { SkillsAutocomplete } from "@/components/ui/SkillsAutocomplete";
+import { SkillsAutocomplete } from "@/components/resume-builder/autocomplete/SkillsAutocomplete";
 
 export function SkillsForm() {
     const dispatch = useDispatch<AppDispatch>();
@@ -80,7 +80,7 @@ export function SkillsForm() {
                                     <SkillsAutocomplete
                                         id={`skill-name-${skill.id}`}
                                         value={skill.name}
-                                        onChange={(val) => handleChange(skill.id, "name", val)}
+                                        onChange={(val: string) => handleChange(skill.id, "name", val)}
                                         className="h-12 border-2 border-border hover:border-primary/50 focus:border-primary transition-colors text-base"
                                     />
                                 </div>

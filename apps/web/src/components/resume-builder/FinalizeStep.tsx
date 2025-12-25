@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, ReactNode } from "react";
-import { DynamicResumePreview } from "./DynamicResumePreview";
+import { DynamicResumePreview } from "./preview/DynamicResumePreview";
 import { Button } from "@/components/ui/button";
 import { Download, Printer, Palette, ArrowLeft, Check } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";

@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import Navbar from "./Navbar";
+import Navbar from "@/components/common/Navbar";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
