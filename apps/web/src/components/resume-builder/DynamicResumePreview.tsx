@@ -31,7 +31,7 @@ export function DynamicResumePreview({ overrideConfig }: DynamicResumePreviewPro
 
     // Derived styles
     const containerClasses = cn(
-        "bg-white text-black font-sans min-h-[29.7cm] w-[21cm] mx-auto shadow-2xl print:shadow-none print:w-full print:max-w-none print:min-h-0 print:mx-0 print:p-0",
+        "bg-white text-black font-sans min-h-[29.7cm] w-[21cm] mx-auto shadow-2xl print:shadow-none print:w-[210mm] print:h-[297mm] print:max-w-none print:min-h-[29.7cm] print:mx-0 print:p-0 overflow-hidden",
         isSidebarLayout ? "grid grid-cols-[30%_70%] min-h-[29.7cm]" : "p-12",
         templateConfig.font
     );

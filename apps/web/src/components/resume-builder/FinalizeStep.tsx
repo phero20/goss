@@ -206,6 +206,20 @@ export function FinalizeStep() {
     const handlePrint = useReactToPrint({
         contentRef,
         documentTitle: `Resume - ${personalInfo?.fullName || "Candidate"}`,
+        pageStyle: `
+        @page {
+            size: A4;
+            margin: 0mm;
+        }
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+        `,
     });
 
     const handleTemplateSelect = (id: string) => {
