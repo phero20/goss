@@ -8,7 +8,9 @@ import { Button } from "@/components/ui/button";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
 import { saveResume, fetchResume } from "@/redux/features/resumeSlice";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+import { ScoreIndicator } from "@/components/resume-builder/ScoreIndicator";
+import { calculateScore } from "@/lib/score";
 
 const steps = [
     { id: "personal", title: "Heading", order: 1 },
@@ -31,6 +33,10 @@ export default function SectionLayout({ children }: { children: React.ReactNode 
     // Determine current step based on URL
     const currentStepId = steps.find(step => pathname.includes(step.id))?.id || "personal";
     const currentStepIndex = steps.findIndex(s => s.id === currentStepId);
+
+    // Calculate Score in real-time
+    const resumeData = useSelector((state: RootState) => state.resume);
+    const { score, tips } = useMemo(() => calculateScore(resumeData), [resumeData]);
 
     // Derived values
     const currentStepOrder = currentStepIndex + 1;
@@ -83,6 +89,10 @@ export default function SectionLayout({ children }: { children: React.ReactNode 
                                 </>
                             )}
                         </div>
+
+                        {/* Resume Score Indicator */}
+                        <ScoreIndicator score={score} tips={tips} className="bg-primary-foreground/5 border-primary-foreground/10 text-primary-foreground" />
+
 
                         <div className="space-y-2">
                             {steps.map((step, index) => {
