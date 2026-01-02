@@ -137,9 +137,9 @@ export default function SectionLayout({ children }: { children: React.ReactNode 
                 </aside>
 
                 {/* Main Content - Form Area */}
-                <main className="flex flex-col lg:ml-64 min-h-screen print:ml-0 print:min-h-0">
+                <main className="flex flex-col lg:ml-64 min-h-screen print:ml-0 print:min-h-0 pb-20 lg:pb-0">
                     <div className={cn(
-                        "flex-1 flex flex-col items-center bg-background/50 print:p-0 print:bg-white",
+                        "flex-1 flex flex-col items-center bg-muted/10 print:p-0 print:bg-white",
                         isFinalizeStep ? "justify-start" : "justify-center"
                     )}>
                         <div className="max-w-360 w-full mx-auto print:max-w-none print:w-full flex-1 flex flex-col">
@@ -171,6 +171,51 @@ export default function SectionLayout({ children }: { children: React.ReactNode 
                         </div>
                     </div>
                 </main>
+
+                {/* Mobile Bottom Verification Progress */}
+                <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 border-t lg:hidden">
+                    <div className="flex items-center justify-between px-6 py-4">
+                        <div className="flex items-center gap-3 mx-auto">
+                            {steps.map((step, index) => {
+                                const stepStatus =
+                                    step.id === currentStepId ? "current" :
+                                        index < currentStepIndex ? "completed" : "upcoming";
+
+                                return (
+                                    <div
+                                        key={step.id}
+                                        onClick={() => autoSaveAndNavigate(`/resume/section/${step.id}`)}
+                                        className="relative flex items-center justify-center cursor-pointer"
+                                    >
+                                        {/* Connecting Line (except last item) */}
+                                        {index < steps.length - 1 && (
+                                            <div className={cn(
+                                                "absolute left-full top-1/2 -translate-y-1/2 h-[2px] w-3 -mx-0.5 z-0",
+                                                index < currentStepIndex ? "bg-primary" : "bg-muted"
+                                            )} />
+                                        )}
+
+                                        {/* Circle Indicator */}
+                                        <div className={cn(
+                                            "relative z-10 w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all duration-300",
+                                            stepStatus === "completed"
+                                                ? "bg-primary border-primary text-primary-foreground"
+                                                : stepStatus === "current"
+                                                    ? "bg-background border-primary text-primary shadow-[0_0_0_2px_rgba(var(--primary),0.2)]"
+                                                    : "bg-muted/30 border-muted-foreground/30 text-muted-foreground"
+                                        )}>
+                                            {stepStatus === "completed" ? (
+                                                <CheckCircle2 className="w-4 h-4" />
+                                            ) : (
+                                                <span className="text-[10px] font-bold">{step.order}</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
             </div>
         </ProtectedRoute>
     );
