@@ -1,17 +1,14 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, forwardRef } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
-import { useReactToPrint } from "react-to-print";
-import { Button } from "@/components/ui/button";
-import { Download, Mail, Phone, MapPin, Linkedin, Globe, Github } from "lucide-react";
+import { Mail, Phone, MapPin, Linkedin, Globe, Github } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export function ResumePreview() {
+export const ResumePreview = forwardRef<HTMLDivElement>((props, ref) => {
     const resumeData = useSelector((state: RootState) => state.resume);
     const { personalInfo, experience, education, skills, summary } = resumeData;
-    const componentRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const [scale, setScale] = useState(1);
 
@@ -57,11 +54,6 @@ export function ResumePreview() {
         };
     }, []);
 
-    const handlePrint = useReactToPrint({
-        contentRef: componentRef,
-        documentTitle: `${personalInfo.fullName || "Resume"}`,
-    });
-
     return (
         <div className="flex flex-col h-full bg-zinc-100/50">
             <style type="text/css" media="print">
@@ -70,13 +62,6 @@ export function ResumePreview() {
                     body { margin: 0; padding: 0; }
                 `}
             </style>
-
-            {/* Toolbar */}
-            <div className="flex items-center justify-end p-4 border-b border-border bg-background/50 backdrop-blur-sm sticky top-0 z-10 print:hidden">
-                <Button onClick={() => handlePrint()} size="sm" className="gap-2 shadow-sm">
-                    <Download className="w-4 h-4" /> Download PDF
-                </Button>
-            </div>
 
             {/* Scrollable Container */}
             <div className="flex-1 overflow-y-auto overflow-x-hidden relative flex flex-col items-center print:overflow-visible" ref={containerRef}>
@@ -89,19 +74,9 @@ export function ResumePreview() {
                         marginBottom: `-${(1 - scale) * 1123}px`
                     }}
                 >
-                    {/* Preview-only wrapper to handle scaling. We CLONE the content for print or just reference the same one? 
-                        react-to-print grabs the ref. If the ref is inside a scaled div, does it matter?
-                        If 'componentRef' is printed, it is detached from DOM and put in iframe.
-                        So styling on PARENT doesn't matter.
-                        BUT styling ON the element matters.
-                        
-                        Current Issue: "height not full". 
-                        The element has `h-full`.
-                        When printed, `h-full` might fail.
-                        We should give it explicit min-height.
-                     */}
+                    {/* Preview-only wrapper to handle scaling. */}
                     <div
-                        ref={componentRef}
+                        ref={ref}
                         className="bg-white text-black shadow-2xl w-full flex flex-col print:shadow-none print:w-[210mm] print:h-[297mm] print:overflow-visible"
                         style={{ minHeight: "1123px" }}
                     >
@@ -166,9 +141,9 @@ export function ResumePreview() {
                             {summary && (
                                 <section>
                                     <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-500 mb-3 flex items-center gap-2">
-                                        <span className="w-full h-[1px] bg-zinc-200"></span>
+                                        <span className="w-full h-px bg-zinc-200"></span>
                                         Professional Summary
-                                        <span className="w-full h-[1px] bg-zinc-200"></span>
+                                        <span className="w-full h-px bg-zinc-200"></span>
                                     </h3>
                                     <p className="text-sm leading-relaxed text-zinc-800 whitespace-pre-wrap text-justify">
                                         {summary}
@@ -180,9 +155,9 @@ export function ResumePreview() {
                             {experience.length > 0 && (
                                 <section>
                                     <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-500 mb-4 flex items-center gap-2">
-                                        <span className="w-full h-[1px] bg-zinc-200"></span>
+                                        <span className="w-full h-px bg-zinc-200"></span>
                                         Experience
-                                        <span className="w-full h-[1px] bg-zinc-200"></span>
+                                        <span className="w-full h-px bg-zinc-200"></span>
                                     </h3>
                                     <div className="space-y-6">
                                         {experience.map((exp) => (
@@ -212,9 +187,9 @@ export function ResumePreview() {
                             {education.length > 0 && (
                                 <section>
                                     <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-500 mb-4 flex items-center gap-2">
-                                        <span className="w-full h-[1px] bg-zinc-200"></span>
+                                        <span className="w-full h-px bg-zinc-200"></span>
                                         Education
-                                        <span className="w-full h-[1px] bg-zinc-200"></span>
+                                        <span className="w-full h-px bg-zinc-200"></span>
                                     </h3>
                                     <div className="space-y-4">
                                         {education.map((edu) => (
@@ -244,9 +219,9 @@ export function ResumePreview() {
                             {skills.length > 0 && (
                                 <section>
                                     <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-500 mb-3 flex items-center gap-2">
-                                        <span className="w-full h-[1px] bg-zinc-200"></span>
+                                        <span className="w-full h-px bg-zinc-200"></span>
                                         Skills
-                                        <span className="w-full h-[1px] bg-zinc-200"></span>
+                                        <span className="w-full h-px bg-zinc-200"></span>
                                     </h3>
                                     <div className="flex flex-wrap gap-2">
                                         {skills.map((skill) => (
@@ -263,4 +238,6 @@ export function ResumePreview() {
             </div>
         </div>
     );
-}
+});
+
+ResumePreview.displayName = "ResumePreview";
