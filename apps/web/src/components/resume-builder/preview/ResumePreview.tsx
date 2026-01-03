@@ -1,146 +1,248 @@
 "use client";
 
+import { useRef, useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
-import { Mail, Phone, MapPin, Linkedin, Github, Globe } from "lucide-react";
+import { useReactToPrint } from "react-to-print";
+import { Button } from "@/components/ui/button";
+import { Download, Mail, Phone, MapPin, Linkedin, Globe, Github } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export function ResumePreview() {
-    const { personalInfo, experience, education, skills, summary } = useSelector((state: RootState) => state.resume);
+    const resumeData = useSelector((state: RootState) => state.resume);
+    const { personalInfo, experience, education, skills, summary } = resumeData;
+    const componentRef = useRef<HTMLDivElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [scale, setScale] = useState(1);
+
+    // Auto-scale logic to fit A4 width into container
+    useEffect(() => {
+        const calculateScale = () => {
+            if (containerRef.current) {
+                const containerWidth = containerRef.current.clientWidth;
+                // A4 Width at 96 DPI is 794px
+                const a4Width = 794;
+                // We desire some padding on sides (e.g. 24px total)
+                const availableWidth = containerWidth - 48;
+
+                let newScale = availableWidth / a4Width;
+
+                // Cap scale at 1.1 (slight zoom allowed) but usually 1 is max
+                if (newScale > 1.2) newScale = 1.2;
+
+                // Allow it to go small for mobile
+                if (newScale < 0.3) newScale = 0.3;
+
+                setScale(newScale);
+            }
+        };
+
+        // Initial calc
+        calculateScale();
+
+        // Add listener
+        const resizeObserver = new ResizeObserver(() => {
+            calculateScale();
+        });
+
+        if (containerRef.current) {
+            resizeObserver.observe(containerRef.current);
+        }
+
+        window.addEventListener("resize", calculateScale);
+
+        return () => {
+            window.removeEventListener("resize", calculateScale);
+            resizeObserver.disconnect();
+        };
+    }, []);
+
+    const handlePrint = useReactToPrint({
+        contentRef: componentRef,
+        documentTitle: `${personalInfo.fullName || "Resume"}`,
+    });
 
     return (
-        <div id="resume-preview" className="bg-white text-black font-sans min-h-[29.7cm] w-[21cm] mx-auto p-12 shadow-2xl print:shadow-none print:w-full print:max-w-none print:min-h-0 print:mx-0 print:p-0">
-            {/* Header */}
-            <header className="border-b-2 border-slate-800 pb-6 mb-8">
-                <h1 className="text-4xl font-bold uppercase tracking-wide text-slate-900 mb-2">
-                    {personalInfo.fullName || "Your Name"}
-                </h1>
-                <h2 className="text-xl text-slate-600 font-medium mb-4">
-                    {personalInfo.jobTitle || "Professional Title"}
-                </h2>
+        <div className="flex flex-col h-full bg-zinc-100/50">
+            {/* Toolbar */}
+            <div className="flex items-center justify-end p-4 border-b border-border bg-background/50 backdrop-blur-sm sticky top-0 z-10">
+                <Button onClick={() => handlePrint()} size="sm" className="gap-2 shadow-sm">
+                    <Download className="w-4 h-4" /> Download PDF
+                </Button>
+            </div>
 
-                <div className="flex flex-wrap gap-4 text-sm text-slate-600">
-                    {personalInfo.email && (
-                        <div className="flex items-center gap-1.5">
-                            <Mail className="w-4 h-4" />
-                            <span>{personalInfo.email}</span>
-                        </div>
-                    )}
-                    {personalInfo.phone && (
-                        <div className="flex items-center gap-1.5">
-                            <Phone className="w-4 h-4" />
-                            <span>{personalInfo.phone}</span>
-                        </div>
-                    )}
-                    {personalInfo.location && (
-                        <div className="flex items-center gap-1.5">
-                            <MapPin className="w-4 h-4" />
-                            <span>{personalInfo.location}</span>
-                        </div>
-                    )}
-                    {personalInfo.linkedin && (
-                        <div className="flex items-center gap-1.5">
-                            <Linkedin className="w-4 h-4" />
-                            <span>{personalInfo.linkedin}</span>
-                        </div>
-                    )}
-                    {personalInfo.github && (
-                        <div className="flex items-center gap-1.5">
-                            <Github className="w-4 h-4" />
-                            <span>{personalInfo.github}</span>
-                        </div>
-                    )}
-                    {personalInfo.website && (
-                        <div className="flex items-center gap-1.5">
-                            <Globe className="w-4 h-4" />
-                            <span>{personalInfo.website}</span>
-                        </div>
-                    )}
-                </div>
-            </header>
+            {/* Scrollable Container */}
+            <div className="flex-1 overflow-y-auto overflow-x-hidden relative flex flex-col items-center" ref={containerRef}>
+                <div
+                    className="my-8 origin-top transition-transform duration-100 ease-out will-change-transform"
+                    style={{
+                        transform: `scale(${scale})`,
+                        width: "794px", // Fixed A4 width in pixels
+                        minHeight: "1123px", // Fixed A4 height in pixels
+                        marginBottom: `-${(1 - scale) * 1123}px` // Compensate vertical space
+                    }}
+                >
+                    {/* The A4 Paper */}
+                    <div
+                        ref={componentRef}
+                        className="bg-white text-black shadow-2xl h-full w-full"
+                    >
+                        <div className="p-[40px] h-full flex flex-col gap-6">
 
-            {/* Summary */}
-            {summary && (
-                <section className="mb-8">
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 mb-3 border-b border-slate-200 pb-1">
-                        Professional Summary
-                    </h3>
-                    <p className="text-slate-800 leading-relaxed text-sm">
-                        {summary}
-                    </p>
-                </section>
-            )}
-
-            {/* Experience */}
-            {experience.length > 0 && (
-                <section className="mb-8">
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 mb-3 border-b border-slate-200 pb-1">
-                        Experience
-                    </h3>
-                    <div className="space-y-6">
-                        {experience.map((job) => (
-                            <div key={job.id}>
-                                <div className="flex justify-between items-baseline mb-1">
-                                    <h4 className="font-bold text-slate-900">{job.jobTitle}</h4>
-                                    <span className="text-sm text-slate-500 font-medium">
-                                        {job.startDate} – {job.endDate}
-                                    </span>
-                                </div>
-                                <div className="flex justify-between items-center mb-2">
-                                    <span className="text-slate-700 font-medium">{job.company}</span>
-                                    <span className="text-xs text-slate-500">{job.location}</span>
-                                </div>
-                                <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
-                                    {job.description}
+                            {/* Header */}
+                            <header className="border-b-2 border-zinc-900 pb-6">
+                                <h1 className="text-4xl font-bold uppercase tracking-tight mb-2 text-zinc-900">
+                                    {personalInfo.fullName || "Your Name"}
+                                </h1>
+                                <p className="text-xl text-zinc-600 font-medium mb-4">
+                                    {personalInfo.jobTitle || "Professional Title"}
                                 </p>
-                            </div>
-                        ))}
-                    </div>
-                </section>
-            )}
 
-            {/* Education */}
-            {education.length > 0 && (
-                <section className="mb-8">
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 mb-3 border-b border-slate-200 pb-1">
-                        Education
-                    </h3>
-                    <div className="space-y-4">
-                        {education.map((edu) => (
-                            <div key={edu.id}>
-                                <div className="flex justify-between items-baseline mb-1">
-                                    <h4 className="font-bold text-slate-900">{edu.school}</h4>
-                                    <span className="text-sm text-slate-500 font-medium">
-                                        {edu.startDate} – {edu.endDate}
-                                    </span>
+                                <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-zinc-600 font-medium">
+                                    {personalInfo.email && (
+                                        <div className="flex items-center gap-1.5">
+                                            <Mail className="w-3.5 h-3.5" />
+                                            <span>{personalInfo.email}</span>
+                                        </div>
+                                    )}
+                                    {personalInfo.phone && (
+                                        <div className="flex items-center gap-1.5">
+                                            <Phone className="w-3.5 h-3.5" />
+                                            <span>{personalInfo.phone}</span>
+                                        </div>
+                                    )}
+                                    {personalInfo.location && (
+                                        <div className="flex items-center gap-1.5">
+                                            <MapPin className="w-3.5 h-3.5" />
+                                            <span>{personalInfo.location}</span>
+                                        </div>
+                                    )}
+                                    {personalInfo.linkedin && (
+                                        <div className="flex items-center gap-1.5">
+                                            <Linkedin className="w-3.5 h-3.5" />
+                                            <a href={personalInfo.linkedin} target="_blank" rel="noreferrer" className="hover:underline">
+                                                LinkedIn
+                                            </a>
+                                        </div>
+                                    )}
+                                    {personalInfo.github && (
+                                        <div className="flex items-center gap-1.5">
+                                            <Github className="w-3.5 h-3.5" />
+                                            <a href={personalInfo.github} target="_blank" rel="noreferrer" className="hover:underline">
+                                                GitHub
+                                            </a>
+                                        </div>
+                                    )}
+                                    {personalInfo.website && (
+                                        <div className="flex items-center gap-1.5">
+                                            <Globe className="w-3.5 h-3.5" />
+                                            <a href={personalInfo.website} target="_blank" rel="noreferrer" className="hover:underline">
+                                                Portfolio
+                                            </a>
+                                        </div>
+                                    )}
                                 </div>
-                                <div className="flex justify-between items-center">
-                                    <span className="text-slate-700">{edu.degree}</span>
-                                    <span className="text-xs text-slate-500">{edu.location}</span>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </section>
-            )}
+                            </header>
 
-            {/* Skills */}
-            {skills.length > 0 && (
-                <section>
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 mb-3 border-b border-slate-200 pb-1">
-                        Skills
-                    </h3>
-                    <div className="flex flex-wrap gap-2">
-                        {skills.map((skill) => (
-                            <span
-                                key={skill.id}
-                                className="bg-slate-100 text-slate-800 px-3 py-1 rounded text-sm font-medium"
-                            >
-                                {skill.name} <span className="text-slate-400 font-normal">| {skill.level}</span>
-                            </span>
-                        ))}
+                            {/* Summary */}
+                            {summary && (
+                                <section>
+                                    <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-500 mb-3 flex items-center gap-2">
+                                        <span className="w-full h-[1px] bg-zinc-200"></span>
+                                        Professional Summary
+                                        <span className="w-full h-[1px] bg-zinc-200"></span>
+                                    </h3>
+                                    <p className="text-sm leading-relaxed text-zinc-800 whitespace-pre-wrap text-justify">
+                                        {summary}
+                                    </p>
+                                </section>
+                            )}
+
+                            {/* Experience */}
+                            {experience.length > 0 && (
+                                <section>
+                                    <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-500 mb-4 flex items-center gap-2">
+                                        <span className="w-full h-[1px] bg-zinc-200"></span>
+                                        Experience
+                                        <span className="w-full h-[1px] bg-zinc-200"></span>
+                                    </h3>
+                                    <div className="space-y-6">
+                                        {experience.map((exp) => (
+                                            <div key={exp.id} className="break-inside-avoid">
+                                                <div className="flex justify-between items-baseline mb-1">
+                                                    <h4 className="font-bold text-lg text-zinc-900">{exp.jobTitle}</h4>
+                                                    <span className="text-xs font-semibold uppercase tracking-wide text-zinc-500 whitespace-nowrap bg-zinc-100 px-2 py-1 rounded">
+                                                        {exp.startDate} – {exp.endDate || "Present"}
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between items-center mb-2">
+                                                    <span className="text-sm font-bold text-zinc-700">{exp.company}</span>
+                                                    <span className="text-xs text-zinc-500 font-medium">{exp.location}</span>
+                                                </div>
+                                                {exp.description && (
+                                                    <p className="text-sm leading-relaxed text-zinc-700 whitespace-pre-wrap">
+                                                        {exp.description}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </section>
+                            )}
+
+                            {/* Education */}
+                            {education.length > 0 && (
+                                <section>
+                                    <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-500 mb-4 flex items-center gap-2">
+                                        <span className="w-full h-[1px] bg-zinc-200"></span>
+                                        Education
+                                        <span className="w-full h-[1px] bg-zinc-200"></span>
+                                    </h3>
+                                    <div className="space-y-4">
+                                        {education.map((edu) => (
+                                            <div key={edu.id} className="break-inside-avoid">
+                                                <div className="flex justify-between items-baseline mb-1">
+                                                    <h4 className="font-bold text-base text-zinc-900">{edu.school}</h4>
+                                                    <span className="text-xs font-semibold uppercase tracking-wide text-zinc-500 whitespace-nowrap bg-zinc-100 px-2 py-1 rounded">
+                                                        {edu.startDate} – {edu.endDate || "Present"}
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-sm text-zinc-800 font-medium">{edu.degree}</span>
+                                                    <span className="text-xs text-zinc-500 italic">{edu.location}</span>
+                                                </div>
+                                                {edu.description && (
+                                                    <p className="text-sm mt-1 text-zinc-600">
+                                                        {edu.description}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </section>
+                            )}
+
+                            {/* Skills */}
+                            {skills.length > 0 && (
+                                <section>
+                                    <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-500 mb-3 flex items-center gap-2">
+                                        <span className="w-full h-[1px] bg-zinc-200"></span>
+                                        Skills
+                                        <span className="w-full h-[1px] bg-zinc-200"></span>
+                                    </h3>
+                                    <div className="flex flex-wrap gap-2">
+                                        {skills.map((skill) => (
+                                            <span key={skill.id} className="px-3 py-1 bg-zinc-900 text-white text-xs font-medium rounded-full shadow-sm">
+                                                {skill.name}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </section>
+                            )}
+                        </div>
                     </div>
-                </section>
-            )}
+                </div>
+            </div>
         </div>
     );
 }

@@ -36,7 +36,7 @@ export function AuthModal({ trigger, defaultTab = "login" }: AuthModalProps) {
         const result = await dispatch(loginUser({ email, password }));
         if (loginUser.fulfilled.match(result)) {
             setIsOpen(false);
-            router.push("/dashboard");
+            router.push("/resume/section/personal");
         }
     };
 
@@ -44,7 +44,7 @@ export function AuthModal({ trigger, defaultTab = "login" }: AuthModalProps) {
         const result = await dispatch(registerUser({ name, email, password }));
         if (registerUser.fulfilled.match(result)) {
             setIsOpen(false);
-            router.push("/dashboard");
+            router.push("/resume/section/personal");
         }
     };
 

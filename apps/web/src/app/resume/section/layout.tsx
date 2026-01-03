@@ -3,14 +3,15 @@
 import { usePathname, useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/common/ProtectedRoute";
 import { cn } from "@/lib/utils";
-import { CheckCircle2, Loader2, Cloud } from "lucide-react"; // Added Icons
+import { CheckCircle2, Loader2, Cloud, Eye, X, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
 import { saveResume, fetchResume } from "@/redux/features/resumeSlice";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ScoreIndicator } from "@/components/resume-builder/ScoreIndicator";
 import { calculateScore } from "@/lib/score";
+import { ResumePreview } from "@/components/resume-builder/preview/ResumePreview";
 
 const steps = [
     { id: "personal", title: "Heading", order: 1 },
@@ -27,8 +28,10 @@ export default function SectionLayout({ children }: { children: React.ReactNode 
     const dispatch = useDispatch<AppDispatch>();
     const isSaving = useSelector((state: RootState) => state.resume.isSaving);
     const lastSaved = useSelector((state: RootState) => state.resume.lastSaved);
-
     const isDirty = useSelector((state: RootState) => state.resume.isDirty);
+
+    // Preview Toggle State - Default false (closed)
+    const [showPreview, setShowPreview] = useState(false);
 
     // Determine current step based on URL
     const currentStepId = steps.find(step => pathname.includes(step.id))?.id || "personal";
@@ -71,7 +74,7 @@ export default function SectionLayout({ children }: { children: React.ReactNode 
 
     return (
         <ProtectedRoute>
-            <div className="min-h-screen bg-background pt-0">
+            <div className="min-h-screen bg-background pt-0 flex relative overflow-hidden">
                 {/* Left Sidebar - Navigation */}
                 <aside className="w-64 border-r border-border bg-primary hidden lg:block fixed h-screen left-0 top-0 overflow-y-auto z-10 print:hidden">
                     <div className="p-6 space-y-8">
@@ -93,7 +96,6 @@ export default function SectionLayout({ children }: { children: React.ReactNode 
                         {/* Resume Score Indicator */}
                         <ScoreIndicator score={score} tips={tips} className="bg-primary-foreground/5 border-primary-foreground/10 text-primary-foreground" />
 
-
                         <div className="space-y-2">
                             {steps.map((step, index) => {
                                 const stepStatus =
@@ -101,128 +103,123 @@ export default function SectionLayout({ children }: { children: React.ReactNode 
                                         index < currentStepIndex ? "completed" : "upcoming";
 
                                 return (
-                                    <div
+                                    <button
                                         key={step.id}
                                         onClick={() => autoSaveAndNavigate(`/resume/section/${step.id}`)}
                                         className={cn(
-                                            "flex items-center gap-3 p-3 rounded-lg transition-colors cursor-pointer",
-                                            stepStatus === "current"
-                                                ? "bg-primary-foreground/10 text-primary-foreground font-medium"
-                                                : "text-primary-foreground/60 hover:bg-primary-foreground/5 hover:text-primary-foreground"
+                                            "w-full flex items-center gap-3 p-3 rounded-lg text-sm transition-all",
+                                            stepStatus === "current" && "bg-white text-primary font-medium shadow-sm",
+                                            stepStatus === "completed" && "text-primary-foreground/90 hover:bg-primary-foreground/10",
+                                            stepStatus === "upcoming" && "text-primary-foreground/50 hover:bg-primary-foreground/5"
                                         )}
                                     >
-                                        <div className="flex items-center justify-center">
-                                            {stepStatus === "completed" ? (
-                                                <CheckCircle2 className="w-5 h-5 text-primary-foreground" />
-                                            ) : (
-                                                <div className={cn(
-                                                    "w-6 h-6 rounded-full border-2 flex items-center justify-center text-xs",
-                                                    stepStatus === "current"
-                                                        ? "border-primary-foreground text-primary-foreground"
-                                                        : "border-primary-foreground/60 text-primary-foreground/60"
-                                                )}>
-                                                    {step.order}
-                                                </div>
-                                            )}
+                                        <div className={cn(
+                                            "w-6 h-6 rounded-full flex items-center justify-center text-xs border",
+                                            stepStatus === "current" && "border-primary bg-primary text-white",
+                                            stepStatus === "completed" && "border-white/50 bg-white/20 text-white",
+                                            stepStatus === "upcoming" && "border-white/20 text-white/50"
+                                        )}>
+                                            {stepStatus === "completed" ? <CheckCircle2 className="w-3.5 h-3.5" /> : step.order}
                                         </div>
-                                        <span className="text-sm">{step.title}</span>
-                                    </div>
+                                        <span>{step.title}</span>
+                                    </button>
                                 );
                             })}
-                        </div>
-
-                        <div className="pt-8 border-t border-primary-foreground/20">
-                            <div className="flex items-center justify-between text-xs uppercase tracking-wider text-primary-foreground/80 font-semibold mb-2">
-                                <span>Completeness</span>
-                                <span>{Math.round(((currentStepOrder - 1) / (steps.length - 1)) * 100)}%</span>
-                            </div>
-                            <div className="h-2 w-full bg-primary-foreground/20 rounded-full overflow-hidden">
-                                <div
-                                    className="h-full bg-primary-foreground transition-all duration-300"
-                                    style={{ width: `${Math.round(((currentStepOrder - 1) / (steps.length - 1)) * 100)}%` }}
-                                ></div>
-                            </div>
                         </div>
                     </div>
                 </aside>
 
-                {/* Main Content - Form Area */}
-                <main className="flex flex-col lg:ml-64 min-h-screen print:ml-0 print:min-h-0 pb-20 lg:pb-0">
-                    <div className={cn(
-                        "flex-1 flex flex-col items-center bg-muted/10 print:p-0 print:bg-white",
-                        isFinalizeStep ? "justify-start" : "justify-center"
-                    )}>
-                        <div className="max-w-360 w-full mx-auto print:max-w-none print:w-full flex-1 flex flex-col">
+                {/* Main Content Area - Scrollable */}
+                {/* We shift the main content area when preview is open on Large screens to avoid overlap if desired, 
+                    OR we just let the preview overlay. 
+                    Given "slides that preview", an overlay is standard. 
+                    Let's just use standard overlay logic for consistent behavior. 
+                */}
+                <main className={cn(
+                    "flex-1 flex flex-col min-h-screen transition-all duration-300 ease-in-out",
+                    "lg:ml-64", // Sidebar offset
+                    showPreview ? "lg:mr-[40vw] xl:mr-[30vw]" : "" // Optional: Push content on very large screens so you can see both?
+                    // Let's TRY pushing it. If user dislikes, we can just overlay.
+                    // User said "ui breaks", possibly because of flex squeezing.
+                    // Pushing margin-right ensures no squeeze, just scroll.
+                )}>
+                    {/* Form Column - Takes full width */}
+                    <div className="flex-1 p-6 md:p-12 pb-32 max-w-4xl mx-auto w-full">
+                        <div className="pb-24">
+                            {children}
+                        </div>
+                       
 
-                            {/* The Step Content */}
-                            <div className="w-full flex-1 relative">
-                                {children}
-                            </div>
-
-                            {/* Navigation Buttons (Bottom) */}
-                            {!isFinalizeStep && (
-                                <div className="flex justify-between mt-8 mb-12 px-5 md:px-12 border-t border-border/40 py-8 print:hidden">
-                                    <Button
-                                        variant="outline"
-                                        onClick={handleBack}
-                                        disabled={currentStepIndex === 0}
-                                        className="h-12 px-8"
-                                    >
-                                        Back
-                                    </Button>
-                                    <Button
-                                        onClick={handleNext}
-                                        className="h-12 px-8 bg-primary text-primary-foreground hover:bg-primary/90"
-                                    >
-                                        {currentStepIndex === steps.length - 1 ? "Finish" : "Next: " + steps[currentStepIndex + 1].title}
-                                    </Button>
+                        {/* Floating Navigation Footer */}
+                        <div className={cn(
+                            "fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-md border-t border-border p-4 z-20 print:hidden transition-all duration-300",
+                            "lg:left-64",
+                            showPreview ? "lg:right-[40vw] xl:right-[30vw]" : "lg:right-0" // Sync footer width with content
+                        )}>
+                            <div className="flex justify-between items-center max-w-4xl mx-auto">
+                                <Button
+                                    variant="ghost"
+                                    onClick={handleBack}
+                                    disabled={currentStepIndex === 0}
+                                >
+                                    Back
+                                </Button>
+                                <div className="text-sm font-medium text-muted-foreground hidden sm:block">
+                                    Step {currentStepOrder} of {steps.length}
                                 </div>
-                            )}
+                                <Button onClick={handleNext}>
+                                    {currentStepIndex === steps.length - 1 ? "Finish" : "Next"}
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 </main>
 
-                {/* Mobile Bottom Verification Progress */}
-                <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 border-t lg:hidden">
-                    <div className="flex items-center justify-between px-6 py-4">
-                        <div className="flex items-center gap-3 mx-auto">
-                            {steps.map((step, index) => {
-                                const stepStatus =
-                                    step.id === currentStepId ? "current" :
-                                        index < currentStepIndex ? "completed" : "upcoming";
+                {/* Preview Toggle Button (Floating) */}
+                <button
+                    onClick={() => setShowPreview(!showPreview)}
+                    className={cn(
+                        "fixed top-6 z-50 p-3 rounded-full shadow-xl transition-all duration-300 hover:scale-105 active:scale-95 print:hidden border",
+                        showPreview
+                            ? "bg-background text-foreground border-border right-[calc(100%-4rem)] md:right-[calc(40vw+1.5rem)] xl:right-[calc(30vw+1.5rem)]"
+                            // When open: Position it near the preview edge or keep it fixed?
+                            // Let's keep it fixed right for easy toggle, or inside the panel.
+                            // Better UX: Keep it fixed Right, but shift it so it's not covered? 
+                            // Actually, let's put it on the panel itself or just keep it simple fixed right.
+                            // If simple fixed right, the panel covers it. 
+                            // Let's make the Z-index of button higher than panel? No, panel takes focus.
+                            // Let's move button to the left of the panel when open.
+                            : "bg-primary text-primary-foreground border-primary right-6"
+                    )}
+                    style={showPreview ? { right: 'auto', left: 'auto', transform: 'translateX(-120%)' } : {}}
+                // Actually, easiest is just a toggle button that stays visible or moves with panel.
+                // Let's try placing it fixed right, but with high Z-index so it floats above panel? 
+                // Or simply inside the panel header?
+                >
+                    {showPreview ? <ChevronRight className="w-6 h-6" /> : <Eye className="w-6 h-6" />}
+                </button>
 
-                                return (
-                                    <div
-                                        key={step.id}
-                                        onClick={() => autoSaveAndNavigate(`/resume/section/${step.id}`)}
-                                        className="relative flex items-center justify-center cursor-pointer"
-                                    >
-                                        {/* Connecting Line (except last item) */}
-                                        {index < steps.length - 1 && (
-                                            <div className={cn(
-                                                "absolute left-full top-1/2 -translate-y-1/2 h-[2px] w-3 -mx-0.5 z-0",
-                                                index < currentStepIndex ? "bg-primary" : "bg-muted"
-                                            )} />
-                                        )}
+                {/* Slide-over Preview Panel */}
+                <div className={cn(
+                    "fixed top-0 right-0 h-screen bg-zinc-50 border-l border-border shadow-2xl transition-transform duration-300 ease-in-out z-40 w-full md:w-[40vw] xl:w-[30vw]",
+                    showPreview ? "translate-x-0" : "translate-x-full"
+                )}>
+                    <div className="h-full w-full relative flex flex-col">
+                        {/* Header of Panel */}
+                        <div className="flex items-center justify-between p-4 border-b border-border bg-background/50 backdrop-blur-sm">
+                            <h2 className="font-semibold">Live Preview</h2>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => setShowPreview(false)}
+                            >
+                                <X className="w-5 h-5" />
+                            </Button>
+                        </div>
 
-                                        {/* Circle Indicator */}
-                                        <div className={cn(
-                                            "relative z-10 w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all duration-300",
-                                            stepStatus === "completed"
-                                                ? "bg-primary border-primary text-primary-foreground"
-                                                : stepStatus === "current"
-                                                    ? "bg-background border-primary text-primary shadow-[0_0_0_2px_rgba(var(--primary),0.2)]"
-                                                    : "bg-muted/30 border-muted-foreground/30 text-muted-foreground"
-                                        )}>
-                                            {stepStatus === "completed" ? (
-                                                <CheckCircle2 className="w-4 h-4" />
-                                            ) : (
-                                                <span className="text-[10px] font-bold">{step.order}</span>
-                                            )}
-                                        </div>
-                                    </div>
-                                );
-                            })}
+                        {/* Content */}
+                        <div className="flex-1 overflow-hidden relative">
+                            <ResumePreview />
                         </div>
                     </div>
                 </div>
