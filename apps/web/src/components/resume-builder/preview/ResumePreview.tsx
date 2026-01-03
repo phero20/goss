@@ -64,30 +64,48 @@ export function ResumePreview() {
 
     return (
         <div className="flex flex-col h-full bg-zinc-100/50">
+            <style type="text/css" media="print">
+                {`
+                    @page { size: A4; margin: 0; }
+                    body { margin: 0; padding: 0; }
+                `}
+            </style>
+
             {/* Toolbar */}
-            <div className="flex items-center justify-end p-4 border-b border-border bg-background/50 backdrop-blur-sm sticky top-0 z-10">
+            <div className="flex items-center justify-end p-4 border-b border-border bg-background/50 backdrop-blur-sm sticky top-0 z-10 print:hidden">
                 <Button onClick={() => handlePrint()} size="sm" className="gap-2 shadow-sm">
                     <Download className="w-4 h-4" /> Download PDF
                 </Button>
             </div>
 
             {/* Scrollable Container */}
-            <div className="flex-1 overflow-y-auto overflow-x-hidden relative flex flex-col items-center" ref={containerRef}>
+            <div className="flex-1 overflow-y-auto overflow-x-hidden relative flex flex-col items-center print:overflow-visible" ref={containerRef}>
                 <div
-                    className="my-8 origin-top transition-transform duration-100 ease-out will-change-transform"
+                    className="my-8 origin-top transition-transform duration-100 ease-out will-change-transform print:hidden"
                     style={{
                         transform: `scale(${scale})`,
-                        width: "794px", // Fixed A4 width in pixels
-                        minHeight: "1123px", // Fixed A4 height in pixels
-                        marginBottom: `-${(1 - scale) * 1123}px` // Compensate vertical space
+                        width: "794px",
+                        minHeight: "1123px",
+                        marginBottom: `-${(1 - scale) * 1123}px`
                     }}
                 >
-                    {/* The A4 Paper */}
+                    {/* Preview-only wrapper to handle scaling. We CLONE the content for print or just reference the same one? 
+                        react-to-print grabs the ref. If the ref is inside a scaled div, does it matter?
+                        If 'componentRef' is printed, it is detached from DOM and put in iframe.
+                        So styling on PARENT doesn't matter.
+                        BUT styling ON the element matters.
+                        
+                        Current Issue: "height not full". 
+                        The element has `h-full`.
+                        When printed, `h-full` might fail.
+                        We should give it explicit min-height.
+                     */}
                     <div
                         ref={componentRef}
-                        className="bg-white text-black shadow-2xl h-full w-full"
+                        className="bg-white text-black shadow-2xl w-full flex flex-col print:shadow-none print:w-[210mm] print:h-[297mm] print:overflow-visible"
+                        style={{ minHeight: "1123px" }}
                     >
-                        <div className="p-[40px] h-full flex flex-col gap-6">
+                        <div className="p-[40px] flex-1 flex flex-col gap-6 print:p-[15mm]">
 
                             {/* Header */}
                             <header className="border-b-2 border-zinc-900 pb-6">
